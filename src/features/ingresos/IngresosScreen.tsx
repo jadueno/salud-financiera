@@ -9,7 +9,7 @@ export function IngresosScreen({ profile }: { profile: FinancialProfile }) {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Ingresos</h1>
-        <p className="text-sm text-[var(--text-secondary)]">Todas tus fuentes de ingreso mensual.</p>
+        <p className="text-base font-medium text-[var(--text-secondary)]">Todas tus fuentes de ingreso mensual.</p>
       </div>
 
       <Card>

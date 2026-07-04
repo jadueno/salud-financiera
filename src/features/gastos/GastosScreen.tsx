@@ -19,8 +19,9 @@ export function GastosScreen({ profile }: { profile: FinancialProfile }) {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Gastos</h1>
-        <p className="text-sm text-[var(--text-secondary)]">
-          Todo lo que te queda por pagar cada mes: {formatEUR(total)} en total.
+        <p className="text-base font-medium text-[var(--text-secondary)]">
+          Todo lo que te queda por pagar cada mes:{" "}
+          <strong className="font-bold text-[var(--text-primary)]">{formatEUR(total)}</strong> en total.
         </p>
       </div>
 

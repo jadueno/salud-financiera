@@ -18,8 +18,10 @@ export function DeudasScreen({ profile }: { profile: FinancialProfile }) {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Deudas</h1>
-        <p className="text-sm text-[var(--text-secondary)]">
-          {formatEUR(totalPayments)}/mes en cuotas · {Math.round(debtLoad * 100)}% de tus ingresos
+        <p className="text-base font-medium text-[var(--text-secondary)]">
+          <strong className="font-bold text-[var(--text-primary)]">{formatEUR(totalPayments)}</strong>/mes en
+          cuotas · <strong className="font-bold text-[var(--text-primary)]">{Math.round(debtLoad * 100)}%</strong>{" "}
+          de tus ingresos
         </p>
       </div>
 

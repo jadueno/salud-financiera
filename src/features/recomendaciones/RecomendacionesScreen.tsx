@@ -14,7 +14,7 @@ export function RecomendacionesScreen({ profile }: { profile: FinancialProfile }
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Recomendaciones</h1>
-        <p className="text-sm text-[var(--text-secondary)]">
+        <p className="text-base font-medium text-[var(--text-secondary)]">
           Qué deberías mejorar, ordenado por prioridad.
         </p>
       </div>
