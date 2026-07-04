@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ComponentType, type SVGProps } from "react";
 import { financialProfile } from "./data/finances";
 import { ResumenScreen } from "./features/resumen/ResumenScreen";
 import { IngresosScreen } from "./features/ingresos/IngresosScreen";
@@ -6,16 +6,29 @@ import { GastosScreen } from "./features/gastos/GastosScreen";
 import { DeudasScreen } from "./features/deudas/DeudasScreen";
 import { AhorroScreen } from "./features/ahorro/AhorroScreen";
 import { RecomendacionesScreen } from "./features/recomendaciones/RecomendacionesScreen";
+import {
+  HomeIcon,
+  IncomeIcon,
+  ExpenseIcon,
+  DebtIcon,
+  SavingsIcon,
+  TipIcon,
+} from "./components/icons";
 
 type Section = "resumen" | "ingresos" | "gastos" | "deudas" | "ahorro" | "recomendaciones";
 
-const sections: { id: Section; label: string }[] = [
-  { id: "resumen", label: "Resumen" },
-  { id: "ingresos", label: "Ingresos" },
-  { id: "gastos", label: "Gastos" },
-  { id: "deudas", label: "Deudas" },
-  { id: "ahorro", label: "Ahorro" },
-  { id: "recomendaciones", label: "Recomendaciones" },
+const sections: {
+  id: Section;
+  label: string;
+  shortLabel: string;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+}[] = [
+  { id: "resumen", label: "Resumen", shortLabel: "Resumen", icon: HomeIcon },
+  { id: "ingresos", label: "Ingresos", shortLabel: "Ingresos", icon: IncomeIcon },
+  { id: "gastos", label: "Gastos", shortLabel: "Gastos", icon: ExpenseIcon },
+  { id: "deudas", label: "Deudas", shortLabel: "Deudas", icon: DebtIcon },
+  { id: "ahorro", label: "Ahorro", shortLabel: "Ahorro", icon: SavingsIcon },
+  { id: "recomendaciones", label: "Recomendaciones", shortLabel: "Consejos", icon: TipIcon },
 ];
 
 export default function App() {
@@ -23,11 +36,12 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen flex-col sm:flex-row">
+      {/* Sidebar de escritorio */}
       <nav
         aria-label="Secciones de la app"
-        className="flex shrink-0 gap-1 overflow-x-auto border-b border-[var(--border)] bg-[var(--surface-1)] p-3 sm:h-screen sm:w-56 sm:flex-col sm:overflow-visible sm:border-b-0 sm:border-r sm:p-4"
+        className="hidden shrink-0 flex-col gap-1 border-r border-[var(--border)] bg-[var(--surface-1)] p-4 sm:flex sm:h-screen sm:w-56"
       >
-        <p className="hidden px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] sm:block">
+        <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
           Salud financiera
         </p>
         {sections.map((s) => (
@@ -36,18 +50,19 @@ export default function App() {
             type="button"
             onClick={() => setSection(s.id)}
             aria-current={section === s.id ? "page" : undefined}
-            className={`shrink-0 rounded-lg px-3 py-2 text-left text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--series-income)] ${
+            className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--series-income)] ${
               section === s.id
                 ? "bg-[var(--series-income)] text-white"
                 : "text-[var(--text-secondary)] hover:bg-[var(--gridline)]"
             }`}
           >
+            <s.icon className="size-5 shrink-0" />
             {s.label}
           </button>
         ))}
       </nav>
 
-      <main className="flex-1 p-4 sm:p-8">
+      <main className="flex-1 p-4 pb-24 sm:p-8 sm:pb-8">
         <div className="mx-auto max-w-3xl">
           {section === "resumen" && <ResumenScreen profile={financialProfile} />}
           {section === "ingresos" && <IngresosScreen profile={financialProfile} />}
@@ -57,6 +72,28 @@ export default function App() {
           {section === "recomendaciones" && <RecomendacionesScreen profile={financialProfile} />}
         </div>
       </main>
+
+      {/* Barra de navegación inferior en móvil */}
+      <nav
+        aria-label="Secciones de la app"
+        className="fixed inset-x-0 bottom-0 z-10 flex border-t border-[var(--border)] bg-[var(--surface-1)] pb-[env(safe-area-inset-bottom)] sm:hidden"
+      >
+        {sections.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => setSection(s.id)}
+            aria-current={section === s.id ? "page" : undefined}
+            className="flex flex-1 flex-col items-center gap-1 px-1 py-2 text-[11px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--series-income)]"
+            style={{
+              color: section === s.id ? "var(--series-income)" : "var(--text-muted)",
+            }}
+          >
+            <s.icon className="size-6 shrink-0" />
+            <span className="leading-tight">{s.shortLabel}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }
