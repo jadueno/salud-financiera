@@ -1,4 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+// Usa el mismo host desde el que se cargó la página (localhost, IP de LAN o
+// de Tailscale) en vez de "localhost" fijo, que en el móvil apuntaría al
+// propio móvil y no al Mac que sirve el backend.
+const API_URL = import.meta.env.VITE_API_URL ?? `${window.location.protocol}//${window.location.hostname}:3001`;
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {

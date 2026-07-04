@@ -6,7 +6,7 @@ const port = Number(process.env.PORT ?? 3001);
 
 async function main() {
   const app = await buildServer(pool);
-  await app.listen({ port, host: "127.0.0.1" });
+  await app.listen({ port, host: "0.0.0.0" });
 }
 
 main().catch((error) => {
