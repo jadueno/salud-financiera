@@ -32,7 +32,10 @@ export interface Debt {
   name: string;
   monthlyPayment: number;
   dueDate: string;
+  /** Saldo pendiente conocido en el mes `balanceAsOf` (no se actualiza solo). */
   remainingBalance?: number;
+  /** Mes al que corresponde `remainingBalance`, formato "YYYY-MM". */
+  balanceAsOf?: string;
 }
 
 export interface EmergencyFund {

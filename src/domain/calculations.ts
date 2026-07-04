@@ -1,4 +1,4 @@
-import type { FinancialProfile, ExpenseGroup } from "./types";
+import type { Debt, ExpenseGroup, FinancialProfile } from "./types";
 
 export function totalMonthlyIncome(profile: FinancialProfile): number {
   return sum(profile.incomes.map((i) => i.monthlyAmount));
@@ -69,6 +69,29 @@ export function savingsRate(profile: FinancialProfile): number {
 
 export function totalMonthlyDebtPayments(profile: FinancialProfile): number {
   return sum(profile.debts.map((d) => d.monthlyPayment));
+}
+
+/**
+ * Saldo pendiente estimado a día de hoy: parte de `remainingBalance` en el mes
+ * `balanceAsOf` y resta una cuota por cada mes completo transcurrido desde
+ * entonces. Es una aproximación sin intereses ni cambios de cuota.
+ */
+export function estimatedRemainingBalance(debt: Debt, today: Date = new Date()): number | undefined {
+  if (debt.remainingBalance === undefined || !debt.balanceAsOf) {
+    return debt.remainingBalance;
+  }
+  const [asOfYear, asOfMonth] = debt.balanceAsOf.split("-").map(Number);
+  const monthsElapsed =
+    (today.getFullYear() - asOfYear) * 12 + (today.getMonth() + 1 - asOfMonth);
+  return Math.max(0, debt.remainingBalance - Math.max(0, monthsElapsed) * debt.monthlyPayment);
+}
+
+export function totalEstimatedRemainingDebt(profile: FinancialProfile, today: Date = new Date()): number {
+  return sum(
+    profile.debts
+      .map((d) => estimatedRemainingBalance(d, today))
+      .filter((v): v is number => v !== undefined),
+  );
 }
 
 export function recommendedNetWorth(profile: FinancialProfile): number {

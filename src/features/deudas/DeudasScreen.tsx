@@ -1,14 +1,18 @@
 import type { FinancialProfile } from "../../domain/types";
-import { formatEUR, totalMonthlyDebtPayments, totalMonthlyIncome } from "../../domain/calculations";
+import {
+  estimatedRemainingBalance,
+  formatEUR,
+  totalEstimatedRemainingDebt,
+  totalMonthlyDebtPayments,
+  totalMonthlyIncome,
+} from "../../domain/calculations";
 import { Card } from "../../components/Card";
-import { useDebtBalances } from "./useDebtBalances";
 
 export function DeudasScreen({ profile }: { profile: FinancialProfile }) {
   const totalPayments = totalMonthlyDebtPayments(profile);
   const income = totalMonthlyIncome(profile);
   const debtLoad = income > 0 ? totalPayments / income : 0;
-  const [balances, setBalance] = useDebtBalances(profile.debts);
-  const totalRemaining = Object.values(balances).reduce((a, b) => a + b, 0);
+  const totalRemaining = totalEstimatedRemainingDebt(profile);
 
   return (
     <div className="flex flex-col gap-6">
@@ -26,10 +30,10 @@ export function DeudasScreen({ profile }: { profile: FinancialProfile }) {
       ) : (
         <>
           <Card>
-            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Saldo pendiente total</h2>
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Saldo pendiente total (estimado)</h2>
             <p className="mt-1 text-xs text-[var(--text-muted)]">
-              Suma de los saldos de abajo. Actualízalos cuando tengas cifras nuevas (por ejemplo cada mes) y
-              se guardan en este navegador.
+              Se recalcula solo cada vez que abres la app, restando las cuotas de los meses transcurridos
+              desde el último dato real. No cuenta intereses.
             </p>
             <p className="mt-3 text-2xl font-semibold tabular-nums text-[var(--text-primary)]">
               {formatEUR(totalRemaining)}
@@ -37,41 +41,43 @@ export function DeudasScreen({ profile }: { profile: FinancialProfile }) {
           </Card>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {profile.debts.map((debt) => (
-              <Card key={debt.name} className="flex flex-col gap-2">
-                <h2 className="font-semibold text-[var(--text-primary)]">{debt.name}</h2>
-                <p className="text-2xl font-semibold tabular-nums text-[var(--text-primary)]">
-                  {formatEUR(debt.monthlyPayment)}
-                  <span className="text-sm font-normal text-[var(--text-muted)]"> /mes</span>
-                </p>
-                <div className="flex justify-between text-sm">
-                  <span className="text-[var(--text-muted)]">Hasta</span>
-                  <span className="font-medium text-[var(--text-secondary)]">{debt.dueDate}</span>
-                </div>
-
-                <label
-                  htmlFor={`balance-${debt.name}`}
-                  className="mt-2 text-sm font-medium text-[var(--text-primary)]"
-                >
-                  Saldo pendiente
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    id={`balance-${debt.name}`}
-                    type="number"
-                    min={0}
-                    step={50}
-                    value={balances[debt.name] ?? 0}
-                    onChange={(e) => setBalance(debt.name, Number(e.target.value))}
-                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-2 focus:outline-offset-2 focus:outline-[var(--series-income)]"
-                  />
-                  <span className="text-sm text-[var(--text-muted)]">€</span>
-                </div>
-              </Card>
-            ))}
+            {profile.debts.map((debt) => {
+              const estimated = estimatedRemainingBalance(debt);
+              return (
+                <Card key={debt.name} className="flex flex-col gap-2">
+                  <h2 className="font-semibold text-[var(--text-primary)]">{debt.name}</h2>
+                  <p className="text-2xl font-semibold tabular-nums text-[var(--text-primary)]">
+                    {debt.monthlyPayment ? formatEUR(debt.monthlyPayment) : "—"}
+                    <span className="text-sm font-normal text-[var(--text-muted)]"> /mes</span>
+                  </p>
+                  <dl className="mt-1 flex flex-col gap-1 text-sm">
+                    <div className="flex justify-between">
+                      <dt className="text-[var(--text-muted)]">Hasta</dt>
+                      <dd className="font-medium text-[var(--text-secondary)]">{debt.dueDate}</dd>
+                    </div>
+                    {estimated !== undefined && (
+                      <div className="flex justify-between">
+                        <dt className="text-[var(--text-muted)]">Saldo pendiente (estimado)</dt>
+                        <dd className="font-medium text-[var(--text-secondary)]">{formatEUR(estimated)}</dd>
+                      </div>
+                    )}
+                    {debt.balanceAsOf && (
+                      <p className="text-xs text-[var(--text-muted)]">
+                        Partiendo del dato de {formatMonth(debt.balanceAsOf)}
+                      </p>
+                    )}
+                  </dl>
+                </Card>
+              );
+            })}
           </div>
         </>
       )}
     </div>
   );
+}
+
+function formatMonth(yyyyMM: string): string {
+  const [year, month] = yyyyMM.split("-").map(Number);
+  return new Date(year, month - 1, 1).toLocaleDateString("es-ES", { month: "long", year: "numeric" });
 }
