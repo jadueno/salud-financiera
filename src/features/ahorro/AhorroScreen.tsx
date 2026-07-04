@@ -3,13 +3,11 @@ import type { Account, FinancialProfile, NewSavingsTracker, SavingsTracker } fro
 import {
   balanceByAccount,
   currentEmergencyFundBalance,
-  deliberateSavingsAndInvestment,
   emergencyFundTarget,
   emergencyFundTracker,
   estimatedTrackerBalance,
   formatEUR,
   formatMonth,
-  idleSurplus,
   investmentTrackers,
   savingsRate,
 } from "../../domain/calculations";
@@ -31,8 +29,6 @@ export function AhorroScreen({ profile, accounts, trackers, onAddTracker, onRemo
   const confirm = useConfirm();
   const [showAddInvestment, setShowAddInvestment] = useState(false);
 
-  const deliberate = deliberateSavingsAndInvestment(profile);
-  const idle = idleSurplus(profile);
   const rate = savingsRate(profile);
   const accountNames = accounts.map((a) => a.name);
   const accountBalances = balanceByAccount(profile, accountNames);
@@ -59,33 +55,6 @@ export function AhorroScreen({ profile, accounts, trackers, onAddTracker, onRemo
           <strong className="font-bold text-[var(--text-primary)]">{Math.round(rate * 100)}%</strong> de tus
           ingresos.
         </p>
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-2">
-        <Card>
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">
-            Ahorro e inversión deliberados
-          </h2>
-          <p className="mt-1 text-xs text-[var(--text-muted)]">
-            Dinero con un destino claro: cuenta de ahorro y aportaciones a inversión/pensión.
-          </p>
-          <p className="mt-3 text-2xl font-semibold tabular-nums" style={{ color: "var(--series-savings)" }}>
-            {formatEUR(deliberate)}
-            <span className="text-sm font-normal text-[var(--text-muted)]"> /mes</span>
-          </p>
-        </Card>
-
-        <Card>
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Dinero acumulado sin destino</h2>
-          <p className="mt-1 text-xs text-[var(--text-muted)]">
-            Se queda en cuentas corrientes sin invertir ni asignar a ahorro. No es "malo", pero no está
-            trabajando para ti.
-          </p>
-          <p className="mt-3 text-2xl font-semibold tabular-nums" style={{ color: "var(--series-expense)" }}>
-            {formatEUR(idle)}
-            <span className="text-sm font-normal text-[var(--text-muted)]"> /mes</span>
-          </p>
-        </Card>
       </div>
 
       <Card>
@@ -156,31 +125,34 @@ export function AhorroScreen({ profile, accounts, trackers, onAddTracker, onRemo
           <p className="mt-4 text-sm text-[var(--text-muted)]">Aún no tienes inversiones registradas.</p>
         ) : (
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {investments.map((tracker) => (
-              <div
-                key={tracker.id}
-                className="rounded-xl border border-[var(--border)] p-4"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold text-[var(--text-primary)]">{tracker.name}</h3>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTracker(tracker.name, tracker.id)}
-                    aria-label={`Eliminar inversión ${tracker.name}`}
-                    className="text-xs text-[var(--text-muted)] hover:text-[var(--status-critical)]"
-                  >
-                    Eliminar
-                  </button>
+            {investments.map((tracker) => {
+              const monthlyRate = accountBalances.find((a) => a.account === tracker.account)?.balance ?? 0;
+              return (
+                <div key={tracker.id} className="rounded-xl border border-[var(--border)] p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-semibold text-[var(--text-primary)]">{tracker.name}</h3>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTracker(tracker.name, tracker.id)}
+                      aria-label={`Eliminar inversión ${tracker.name}`}
+                      className="text-xs text-[var(--text-muted)] hover:text-[var(--status-critical)]"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                  <p className="text-xs text-[var(--text-muted)]">{tracker.account}</p>
+                  <p className="mt-2 text-xl font-bold tabular-nums" style={{ color: "var(--series-violet)" }}>
+                    {formatEUR(estimatedTrackerBalance(tracker, accountBalances))}
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--text-muted)]">
+                    Partiendo de {formatEUR(tracker.initialBalance)} en {formatMonth(tracker.initialBalanceAsOf)}
+                  </p>
+                  <p className="mt-1 text-sm font-medium" style={{ color: "var(--series-savings)" }}>
+                    +{formatEUR(monthlyRate)}/mes
+                  </p>
                 </div>
-                <p className="text-xs text-[var(--text-muted)]">{tracker.account}</p>
-                <p className="mt-2 text-xl font-bold tabular-nums" style={{ color: "var(--series-violet)" }}>
-                  {formatEUR(estimatedTrackerBalance(tracker, accountBalances))}
-                </p>
-                <p className="mt-1 text-xs text-[var(--text-muted)]">
-                  Partiendo de {formatEUR(tracker.initialBalance)} en {formatMonth(tracker.initialBalanceAsOf)}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Card>
