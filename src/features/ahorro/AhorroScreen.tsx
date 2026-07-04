@@ -9,10 +9,8 @@ import {
 import { Card } from "../../components/Card";
 import { ProgressBar } from "../../components/ProgressBar";
 import { useEmergencyFundBalance } from "./useEmergencyFundBalance";
-import { useLiveIncomes } from "../gastos/useLiveIncomes";
 
-export function AhorroScreen({ profile: baseProfile }: { profile: FinancialProfile }) {
-  const [profile] = useLiveIncomes(baseProfile);
+export function AhorroScreen({ profile }: { profile: FinancialProfile }) {
   const deliberate = deliberateSavingsAndInvestment(profile);
   const idle = idleSurplus(profile);
   const rate = savingsRate(profile);
@@ -74,7 +72,7 @@ export function AhorroScreen({ profile: baseProfile }: { profile: FinancialProfi
               id="ef-balance"
               type="number"
               min={0}
-              step={50}
+              step={0.01}
               value={balance}
               onChange={(e) => setBalance(Number(e.target.value))}
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-2 focus:outline-offset-2 focus:outline-[var(--series-income)]"

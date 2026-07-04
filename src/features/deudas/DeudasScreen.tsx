@@ -1,4 +1,5 @@
-import type { FinancialProfile } from "../../domain/types";
+import { useState } from "react";
+import type { FinancialProfile, NewDebt } from "../../domain/types";
 import {
   estimatedRemainingBalance,
   formatEUR,
@@ -7,10 +8,18 @@ import {
   totalMonthlyIncome,
 } from "../../domain/calculations";
 import { Card } from "../../components/Card";
-import { useLiveIncomes } from "../gastos/useLiveIncomes";
+import { AddDebtForm } from "./AddDebtForm";
 
-export function DeudasScreen({ profile: baseProfile }: { profile: FinancialProfile }) {
-  const [profile] = useLiveIncomes(baseProfile);
+export function DeudasScreen({
+  profile,
+  onAddDebt,
+  onRemoveDebt,
+}: {
+  profile: FinancialProfile;
+  onAddDebt: (debt: NewDebt) => Promise<void>;
+  onRemoveDebt: (id: string) => Promise<void>;
+}) {
+  const [showForm, setShowForm] = useState(false);
   const totalPayments = totalMonthlyDebtPayments(profile);
   const income = totalMonthlyIncome(profile);
   const debtLoad = income > 0 ? totalPayments / income : 0;
@@ -18,14 +27,33 @@ export function DeudasScreen({ profile: baseProfile }: { profile: FinancialProfi
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Deudas</h1>
-        <p className="text-base font-medium text-[var(--text-secondary)]">
-          <strong className="font-bold text-[var(--text-primary)]">{formatEUR(totalPayments)}</strong>/mes en
-          cuotas · <strong className="font-bold text-[var(--text-primary)]">{Math.round(debtLoad * 100)}%</strong>{" "}
-          de tus ingresos
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Deudas</h1>
+          <p className="text-base font-medium text-[var(--text-secondary)]">
+            <strong className="font-bold text-[var(--text-primary)]">{formatEUR(totalPayments)}</strong>/mes en
+            cuotas · <strong className="font-bold text-[var(--text-primary)]">{Math.round(debtLoad * 100)}%</strong>{" "}
+            de tus ingresos
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowForm((v) => !v)}
+          className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium text-white"
+          style={{ backgroundColor: "var(--series-income)" }}
+        >
+          {showForm ? "Cancelar" : "+ Añadir deuda"}
+        </button>
       </div>
+
+      {showForm && (
+        <AddDebtForm
+          onSubmit={async (debt) => {
+            await onAddDebt(debt);
+            setShowForm(false);
+          }}
+        />
+      )}
 
       {profile.debts.length === 0 ? (
         <Card>
@@ -57,8 +85,18 @@ export function DeudasScreen({ profile: baseProfile }: { profile: FinancialProfi
             {profile.debts.map((debt) => {
               const estimated = estimatedRemainingBalance(debt);
               return (
-                <Card key={debt.name} className="flex flex-col gap-2">
-                  <h2 className="font-semibold text-[var(--text-primary)]">{debt.name}</h2>
+                <Card key={debt.id} className="flex flex-col gap-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <h2 className="font-semibold text-[var(--text-primary)]">{debt.name}</h2>
+                    <button
+                      type="button"
+                      onClick={() => onRemoveDebt(debt.id)}
+                      aria-label={`Eliminar deuda ${debt.name}`}
+                      className="text-xs text-[var(--text-muted)] hover:text-[var(--status-critical)]"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                   <p className="text-2xl font-semibold tabular-nums text-[var(--text-primary)]">
                     {debt.monthlyPayment ? formatEUR(debt.monthlyPayment) : "—"}
                     <span className="text-sm font-normal text-[var(--text-muted)]"> /mes</span>

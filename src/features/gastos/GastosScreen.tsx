@@ -1,18 +1,37 @@
-import type { FinancialProfile } from "../../domain/types";
-import {
-  balanceByAccount,
-  formatEUR,
-  totalMonthlyExpenses,
-  totalMonthlyIncome,
-} from "../../domain/calculations";
+import { useState } from "react";
+import type { FinancialProfile, NewExpenseItem, NewIncomeSource, NewTransfer } from "../../domain/types";
+import { balanceByAccount, formatEUR, totalMonthlyExpenses, totalMonthlyIncome } from "../../domain/calculations";
 import { Card } from "../../components/Card";
-import { useLiveIncomes } from "./useLiveIncomes";
+import { AddIncomeForm } from "./AddIncomeForm";
+import { AddExpenseForm } from "./AddExpenseForm";
+import { AddTransferForm } from "./AddTransferForm";
 
-export function GastosScreen({ profile: baseProfile }: { profile: FinancialProfile }) {
-  const [profile, updateIncome] = useLiveIncomes(baseProfile);
+interface Props {
+  profile: FinancialProfile;
+  onAddIncome: (income: NewIncomeSource) => Promise<void>;
+  onUpdateIncome: (id: string, income: NewIncomeSource) => Promise<void>;
+  onRemoveIncome: (id: string) => Promise<void>;
+  onAddExpense: (expense: NewExpenseItem) => Promise<void>;
+  onRemoveExpense: (id: string) => Promise<void>;
+  onAddTransfer: (transfer: NewTransfer) => Promise<void>;
+  onRemoveTransfer: (id: string) => Promise<void>;
+}
+
+export function GastosScreen({
+  profile,
+  onAddIncome,
+  onUpdateIncome,
+  onRemoveIncome,
+  onAddExpense,
+  onRemoveExpense,
+  onAddTransfer,
+  onRemoveTransfer,
+}: Props) {
+  const [openForm, setOpenForm] = useState<"income" | "expense" | "transfer" | null>(null);
   const totalIncome = totalMonthlyIncome(profile);
   const totalExpenses = totalMonthlyExpenses(profile);
   const accountBalances = balanceByAccount(profile);
+  const knownAccounts = accountBalances.map((a) => a.account);
 
   return (
     <div className="flex flex-col gap-6">
@@ -33,12 +52,12 @@ export function GastosScreen({ profile: baseProfile }: { profile: FinancialProfi
           </p>
         </div>
         <p className="mt-1 text-xs text-[var(--text-muted)]">
-          Edita cualquier importe si cambia: el resto de la app (cuentas, ahorro, deudas, recomendaciones)
-          se recalcula solo.
+          Edita, añade o quita cualquier ingreso: el resto de la app (cuentas, ahorro, deudas,
+          recomendaciones) se recalcula solo.
         </p>
         <ul className="mt-4 flex flex-col gap-3">
-          {profile.incomes.map((income, idx) => (
-            <li key={`${income.account}-${income.label}-${idx}`} className="flex items-center justify-between gap-3">
+          {profile.incomes.map((income) => (
+            <li key={income.id} className="flex items-center justify-between gap-3">
               <div className="text-sm">
                 <p className="font-medium text-[var(--text-primary)]">{income.label}</p>
                 <p className="text-[var(--text-muted)]">{income.account}</p>
@@ -47,21 +66,80 @@ export function GastosScreen({ profile: baseProfile }: { profile: FinancialProfi
                 <input
                   type="number"
                   min={0}
-                  step={10}
+                  step={0.01}
                   aria-label={`Importe mensual de ${income.label}`}
                   value={income.monthlyAmount}
-                  onChange={(e) => updateIncome(income.account, income.label, Number(e.target.value))}
+                  onChange={(e) =>
+                    onUpdateIncome(income.id, {
+                      account: income.account,
+                      label: income.label,
+                      monthlyAmount: Number(e.target.value),
+                    })
+                  }
                   className="w-28 rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-right text-sm tabular-nums text-[var(--text-primary)] focus:outline-2 focus:outline-offset-2 focus:outline-[var(--series-income)]"
                 />
                 <span className="text-sm text-[var(--text-muted)]">€</span>
+                <button
+                  type="button"
+                  onClick={() => onRemoveIncome(income.id)}
+                  aria-label={`Eliminar ingreso ${income.label}`}
+                  className="ml-1 text-xs text-[var(--text-muted)] hover:text-[var(--status-critical)]"
+                >
+                  Eliminar
+                </button>
               </div>
             </li>
           ))}
         </ul>
+
+        {openForm === "income" ? (
+          <AddIncomeForm knownAccounts={knownAccounts} onSubmit={onAddIncome} onCancel={() => setOpenForm(null)} />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setOpenForm("income")}
+            className="mt-4 rounded-lg px-3 py-2 text-sm font-medium text-white"
+            style={{ backgroundColor: "var(--series-income)" }}
+          >
+            + Añadir ingreso
+          </button>
+        )}
       </Card>
 
       <div>
-        <h2 className="mb-3 text-lg font-semibold text-[var(--text-primary)]">Por cuenta bancaria</h2>
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Por cuenta bancaria</h2>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setOpenForm(openForm === "expense" ? null : "expense")}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-white"
+              style={{ backgroundColor: "var(--series-expense)" }}
+            >
+              + Añadir gasto
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpenForm(openForm === "transfer" ? null : "transfer")}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-white"
+              style={{ backgroundColor: "var(--series-violet)" }}
+            >
+              + Añadir transferencia
+            </button>
+          </div>
+        </div>
+
+        {openForm === "expense" && (
+          <Card className="mb-4">
+            <AddExpenseForm knownAccounts={knownAccounts} onSubmit={onAddExpense} onCancel={() => setOpenForm(null)} />
+          </Card>
+        )}
+        {openForm === "transfer" && (
+          <Card className="mb-4">
+            <AddTransferForm knownAccounts={knownAccounts} onSubmit={onAddTransfer} onCancel={() => setOpenForm(null)} />
+          </Card>
+        )}
+
         <div className="flex flex-col gap-4">
           {accountBalances.map(({ account, income, expenses, balance }) => {
             const items = profile.expenses.filter((e) => e.account === account);
@@ -77,8 +155,7 @@ export function GastosScreen({ profile: baseProfile }: { profile: FinancialProfi
               return null;
             }
 
-            const balanceColor =
-              balance >= 0 ? "var(--series-savings)" : "var(--series-expense)";
+            const balanceColor = balance >= 0 ? "var(--series-savings)" : "var(--series-expense)";
 
             return (
               <Card key={account}>
@@ -101,14 +178,14 @@ export function GastosScreen({ profile: baseProfile }: { profile: FinancialProfi
 
                 {incomeItems.length > 0 && (
                   <ul className="mt-4 flex flex-col gap-1 border-t border-[var(--gridline)] pt-3 text-sm">
-                    {incomeItems.map((i, idx) => (
-                      <li key={`${i.label}-${idx}`} className="flex justify-between">
+                    {incomeItems.map((i) => (
+                      <li key={i.id} className="flex items-center justify-between gap-2">
                         <span className="text-[var(--text-secondary)]">{i.label}</span>
-                        <span
-                          className="tabular-nums font-medium"
-                          style={{ color: "var(--series-income)" }}
-                        >
-                          +{formatEUR(i.monthlyAmount)}
+                        <span className="flex items-center gap-2">
+                          <span className="tabular-nums font-medium" style={{ color: "var(--series-income)" }}>
+                            +{formatEUR(i.monthlyAmount)}
+                          </span>
+                          <DeleteButton onClick={() => onRemoveIncome(i.id)} label={`Eliminar ingreso ${i.label}`} />
                         </span>
                       </li>
                     ))}
@@ -117,11 +194,14 @@ export function GastosScreen({ profile: baseProfile }: { profile: FinancialProfi
 
                 {transfersIn.length > 0 && (
                   <ul className="mt-3 flex flex-col gap-1 border-t border-[var(--gridline)] pt-3 text-sm">
-                    {transfersIn.map((t, idx) => (
-                      <li key={`in-${t.fromAccount}-${idx}`} className="flex justify-between">
+                    {transfersIn.map((t) => (
+                      <li key={t.id} className="flex items-center justify-between gap-2">
                         <span className="text-[var(--text-secondary)]">← Transferencia de {t.fromAccount}</span>
-                        <span className="tabular-nums font-medium" style={{ color: "var(--series-violet)" }}>
-                          +{formatEUR(t.monthlyAmount)}
+                        <span className="flex items-center gap-2">
+                          <span className="tabular-nums font-medium" style={{ color: "var(--series-violet)" }}>
+                            +{formatEUR(t.monthlyAmount)}
+                          </span>
+                          <DeleteButton onClick={() => onRemoveTransfer(t.id)} label="Eliminar transferencia" />
                         </span>
                       </li>
                     ))}
@@ -130,11 +210,14 @@ export function GastosScreen({ profile: baseProfile }: { profile: FinancialProfi
 
                 {transfersOut.length > 0 && (
                   <ul className="mt-3 flex flex-col gap-1 border-t border-[var(--gridline)] pt-3 text-sm">
-                    {transfersOut.map((t, idx) => (
-                      <li key={`out-${t.toAccount}-${idx}`} className="flex justify-between">
+                    {transfersOut.map((t) => (
+                      <li key={t.id} className="flex items-center justify-between gap-2">
                         <span className="text-[var(--text-secondary)]">→ Transferencia a {t.toAccount}</span>
-                        <span className="tabular-nums font-medium" style={{ color: "var(--series-violet)" }}>
-                          −{formatEUR(t.monthlyAmount)}
+                        <span className="flex items-center gap-2">
+                          <span className="tabular-nums font-medium" style={{ color: "var(--series-violet)" }}>
+                            −{formatEUR(t.monthlyAmount)}
+                          </span>
+                          <DeleteButton onClick={() => onRemoveTransfer(t.id)} label="Eliminar transferencia" />
                         </span>
                       </li>
                     ))}
@@ -143,16 +226,19 @@ export function GastosScreen({ profile: baseProfile }: { profile: FinancialProfi
 
                 {items.length > 0 && (
                   <ul className="mt-3 flex flex-col gap-1 border-t border-[var(--gridline)] pt-3 text-sm">
-                    {items.map((item, idx) => (
-                      <li key={`${item.label}-${idx}`} className="flex justify-between">
+                    {items.map((item) => (
+                      <li key={item.id} className="flex items-center justify-between gap-2">
                         <span className="text-[var(--text-primary)]">
                           {item.label}
                           {item.property && item.property !== "General" ? (
                             <span className="ml-2 text-xs text-[var(--text-muted)]">({item.property})</span>
                           ) : null}
                         </span>
-                        <span className="tabular-nums font-medium text-[var(--text-primary)]">
-                          −{formatEUR(item.monthlyAmount)}
+                        <span className="flex items-center gap-2">
+                          <span className="tabular-nums font-medium text-[var(--text-primary)]">
+                            −{formatEUR(item.monthlyAmount)}
+                          </span>
+                          <DeleteButton onClick={() => onRemoveExpense(item.id)} label={`Eliminar gasto ${item.label}`} />
                         </span>
                       </li>
                     ))}
@@ -164,5 +250,18 @@ export function GastosScreen({ profile: baseProfile }: { profile: FinancialProfi
         </div>
       </div>
     </div>
+  );
+}
+
+function DeleteButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="text-xs text-[var(--text-muted)] hover:text-[var(--status-critical)]"
+    >
+      ×
+    </button>
   );
 }

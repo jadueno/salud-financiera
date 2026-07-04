@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-salud_financiera}
+      POSTGRES_USER: ${POSTGRES_USER:-salud_financiera}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-salud_financiera}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - salud-financiera-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-salud_financiera}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  salud-financiera-db:

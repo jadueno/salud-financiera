@@ -14,10 +14,8 @@ import { BarComparison } from "../../components/BarComparison";
 import { ProgressBar } from "../../components/ProgressBar";
 import { SeverityBadge } from "../../components/StatusBadge";
 import { useEmergencyFundBalance } from "../ahorro/useEmergencyFundBalance";
-import { useLiveIncomes } from "../gastos/useLiveIncomes";
 
-export function ResumenScreen({ profile: baseProfile }: { profile: FinancialProfile }) {
-  const [profile] = useLiveIncomes(baseProfile);
+export function ResumenScreen({ profile }: { profile: FinancialProfile }) {
   const income = totalMonthlyIncome(profile);
   const expenses = totalMonthlyExpenses(profile);
   const savings = deliberateSavingsAndInvestment(profile);

@@ -1,0 +1,65 @@
+import "dotenv/config";
+import { pool } from "./pool.js";
+import type { NewDebt, NewExpense, NewIncome, NewTransfer } from "../../domain/types.js";
+
+/**
+ * Plantilla de ejemplo. Copia este archivo a `seed.ts` (ignorado por git)
+ * y sustituye los valores por tus datos reales.
+ */
+const incomes: NewIncome[] = [
+  { account: "Cuenta Nómina", label: "Sueldo Neto mensual", monthlyAmount: 2000 },
+];
+
+const expenses: NewExpense[] = [
+  { category: "Fijos", account: "Cuenta Nómina", property: null, label: "Alquiler", monthlyAmount: 700 },
+  { category: "Variables", account: "Cuenta Nómina", property: null, label: "Ocio", monthlyAmount: 150 },
+];
+
+const debts: NewDebt[] = [
+  { name: "Préstamo coche", monthlyPayment: 150, dueDate: "01/2028", remainingBalance: 3000, balanceAsOf: null },
+];
+
+const transfers: NewTransfer[] = [
+  { fromAccount: "Cuenta Nómina", toAccount: "Cuenta Ahorro", monthlyAmount: 200, isSavingsOrInvestment: true },
+];
+
+async function seed() {
+  await pool.query("truncate incomes, expenses, debts, transfers");
+
+  for (const i of incomes) {
+    await pool.query("insert into incomes (account, label, monthly_amount) values ($1, $2, $3)", [
+      i.account,
+      i.label,
+      i.monthlyAmount,
+    ]);
+  }
+
+  for (const e of expenses) {
+    await pool.query(
+      "insert into expenses (category, account, property, label, monthly_amount) values ($1, $2, $3, $4, $5)",
+      [e.category, e.account, e.property, e.label, e.monthlyAmount],
+    );
+  }
+
+  for (const d of debts) {
+    await pool.query(
+      "insert into debts (name, monthly_payment, due_date, remaining_balance, balance_as_of) values ($1, $2, $3, $4, $5)",
+      [d.name, d.monthlyPayment, d.dueDate, d.remainingBalance, d.balanceAsOf],
+    );
+  }
+
+  for (const t of transfers) {
+    await pool.query(
+      "insert into transfers (from_account, to_account, monthly_amount, is_savings_or_investment) values ($1, $2, $3, $4)",
+      [t.fromAccount, t.toAccount, t.monthlyAmount, t.isSavingsOrInvestment],
+    );
+  }
+
+  console.log("Seed de ejemplo completo.");
+  await pool.end();
+}
+
+seed().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

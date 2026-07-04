@@ -2,12 +2,10 @@ import type { FinancialProfile } from "../../domain/types";
 import { buildRecommendations } from "../../domain/calculations";
 import { Card } from "../../components/Card";
 import { SeverityBadge } from "../../components/StatusBadge";
-import { useLiveIncomes } from "../gastos/useLiveIncomes";
 
 const severityRank = { alta: 0, media: 1, baja: 2 } as const;
 
-export function RecomendacionesScreen({ profile: baseProfile }: { profile: FinancialProfile }) {
-  const [profile] = useLiveIncomes(baseProfile);
+export function RecomendacionesScreen({ profile }: { profile: FinancialProfile }) {
   const recommendations = [...buildRecommendations(profile)].sort(
     (a, b) => severityRank[a.severity] - severityRank[b.severity],
   );

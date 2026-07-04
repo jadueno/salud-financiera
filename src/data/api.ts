@@ -1,0 +1,25 @@
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: init?.body ? { "Content-Type": "application/json" } : undefined,
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? `Error ${res.status} en ${path}`);
+  }
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}
+
+/** Cliente CRUD genérico para un recurso REST estándar (GET/POST/PUT/DELETE). */
+export function createCrudClient<T, TNew>(path: string) {
+  return {
+    list: () => request<T[]>(path),
+    create: (entity: TNew) => request<T>(path, { method: "POST", body: JSON.stringify(entity) }),
+    update: (id: string, entity: TNew) =>
+      request<T>(`${path}/${id}`, { method: "PUT", body: JSON.stringify(entity) }),
+    remove: (id: string) => request<void>(`${path}/${id}`, { method: "DELETE" }),
+  };
+}

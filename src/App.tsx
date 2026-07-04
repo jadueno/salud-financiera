@@ -1,5 +1,5 @@
 import { useState, type ComponentType, type SVGProps } from "react";
-import { financialProfile } from "./data/finances";
+import { useFinancialData } from "./data/useFinancialData";
 import { ResumenScreen } from "./features/resumen/ResumenScreen";
 import { GastosScreen } from "./features/gastos/GastosScreen";
 import { DeudasScreen } from "./features/deudas/DeudasScreen";
@@ -24,6 +24,7 @@ const sections: {
 
 export default function App() {
   const [section, setSection] = useState<Section>("resumen");
+  const data = useFinancialData();
 
   return (
     <div className="flex min-h-screen flex-col sm:flex-row">
@@ -55,11 +56,41 @@ export default function App() {
 
       <main className="flex-1 p-4 pb-24 sm:p-8 sm:pb-8">
         <div className="mx-auto max-w-3xl">
-          {section === "resumen" && <ResumenScreen profile={financialProfile} />}
-          {section === "gastos" && <GastosScreen profile={financialProfile} />}
-          {section === "deudas" && <DeudasScreen profile={financialProfile} />}
-          {section === "ahorro" && <AhorroScreen profile={financialProfile} />}
-          {section === "recomendaciones" && <RecomendacionesScreen profile={financialProfile} />}
+          {data.error && (
+            <div
+              role="alert"
+              className="mb-4 rounded-xl border p-4 text-sm"
+              style={{ borderColor: "var(--status-critical)", color: "var(--status-critical)" }}
+            >
+              No se ha podido conectar con el backend ({data.error}). ¿Está corriendo{" "}
+              <code>npm run dev</code> dentro de <code>backend/</code>?
+            </div>
+          )}
+          {!data.profile && !data.error && (
+            <p className="text-sm text-[var(--text-muted)]">Cargando datos…</p>
+          )}
+          {data.profile && (
+            <>
+              {section === "resumen" && <ResumenScreen profile={data.profile} />}
+              {section === "gastos" && (
+                <GastosScreen
+                  profile={data.profile}
+                  onAddIncome={data.addIncome}
+                  onUpdateIncome={data.updateIncome}
+                  onRemoveIncome={data.removeIncome}
+                  onAddExpense={data.addExpense}
+                  onRemoveExpense={data.removeExpense}
+                  onAddTransfer={data.addTransfer}
+                  onRemoveTransfer={data.removeTransfer}
+                />
+              )}
+              {section === "deudas" && (
+                <DeudasScreen profile={data.profile} onAddDebt={data.addDebt} onRemoveDebt={data.removeDebt} />
+              )}
+              {section === "ahorro" && <AhorroScreen profile={data.profile} />}
+              {section === "recomendaciones" && <RecomendacionesScreen profile={data.profile} />}
+            </>
+          )}
         </div>
       </main>
 
