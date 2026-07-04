@@ -16,6 +16,7 @@
   --series-income: #2a78d6; /* blue */
   --series-savings: #1baf7a; /* aqua */
   --series-expense: #eb6834; /* orange */
+  --series-violet: #4a3aa7; /* transferencias internas */
 
   --status-good: #0ca30c;
   --status-warning: #fab219;
@@ -36,6 +37,7 @@
     --series-income: #3987e5;
     --series-savings: #199e70;
     --series-expense: #d95926;
+    --series-violet: #9085e9;
 
     --status-good: #0ca30c;
     --status-warning: #fab219;

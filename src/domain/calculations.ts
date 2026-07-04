@@ -12,20 +12,47 @@ export interface AccountBalance {
   account: string;
   income: number;
   expenses: number;
+  transfersIn: number;
+  transfersOut: number;
   balance: number;
 }
 
-/** Ingresos, gastos y balance agrupados por cuenta bancaria, en el orden en que aparecen las cuentas en el perfil. */
+/**
+ * Ingresos, gastos, transferencias y balance agrupados por cuenta, en el
+ * orden en que aparecen las cuentas en el perfil. El balance ya tiene en
+ * cuenta las transferencias entre cuentas (una cuenta puede tener superávit
+ * en ingresos-gastos pero balance bajo porque ese dinero se transfiere fuera).
+ */
 export function balanceByAccount(profile: FinancialProfile): AccountBalance[] {
   const accounts: string[] = [];
-  for (const a of profile.accountFlows) if (!accounts.includes(a.account)) accounts.push(a.account);
-  for (const i of profile.incomes) if (!accounts.includes(i.account)) accounts.push(i.account);
-  for (const e of profile.expenses) if (!accounts.includes(e.account)) accounts.push(e.account);
+  const add = (a: string) => {
+    if (!accounts.includes(a)) accounts.push(a);
+  };
+  for (const a of profile.accountFlows) add(a.account);
+  for (const i of profile.incomes) add(i.account);
+  for (const e of profile.expenses) add(e.account);
+  for (const t of profile.transfers) {
+    add(t.fromAccount);
+    add(t.toAccount);
+  }
 
   return accounts.map((account) => {
     const income = sum(profile.incomes.filter((i) => i.account === account).map((i) => i.monthlyAmount));
     const expenses = sum(profile.expenses.filter((e) => e.account === account).map((e) => e.monthlyAmount));
-    return { account, income, expenses, balance: income - expenses };
+    const transfersOut = sum(
+      profile.transfers.filter((t) => t.fromAccount === account).map((t) => t.monthlyAmount),
+    );
+    const transfersIn = sum(
+      profile.transfers.filter((t) => t.toAccount === account).map((t) => t.monthlyAmount),
+    );
+    return {
+      account,
+      income,
+      expenses,
+      transfersIn,
+      transfersOut,
+      balance: income + transfersIn - expenses - transfersOut,
+    };
   });
 }
 

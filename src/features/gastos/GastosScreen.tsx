@@ -29,7 +29,16 @@ export function GastosScreen({ profile }: { profile: FinancialProfile }) {
           {accountBalances.map(({ account, income, expenses, balance }) => {
             const items = profile.expenses.filter((e) => e.account === account);
             const incomeItems = profile.incomes.filter((i) => i.account === account);
-            if (items.length === 0 && incomeItems.length === 0) return null;
+            const transfersOut = profile.transfers.filter((t) => t.fromAccount === account);
+            const transfersIn = profile.transfers.filter((t) => t.toAccount === account);
+            if (
+              items.length === 0 &&
+              incomeItems.length === 0 &&
+              transfersOut.length === 0 &&
+              transfersIn.length === 0
+            ) {
+              return null;
+            }
 
             const balanceColor =
               balance >= 0 ? "var(--series-savings)" : "var(--series-expense)";
@@ -63,6 +72,32 @@ export function GastosScreen({ profile }: { profile: FinancialProfile }) {
                           style={{ color: "var(--series-income)" }}
                         >
                           +{formatEUR(i.monthlyAmount)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {transfersIn.length > 0 && (
+                  <ul className="mt-3 flex flex-col gap-1 border-t border-[var(--gridline)] pt-3 text-sm">
+                    {transfersIn.map((t, idx) => (
+                      <li key={`in-${t.fromAccount}-${idx}`} className="flex justify-between">
+                        <span className="text-[var(--text-secondary)]">← Transferencia de {t.fromAccount}</span>
+                        <span className="tabular-nums font-medium" style={{ color: "var(--series-violet)" }}>
+                          +{formatEUR(t.monthlyAmount)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {transfersOut.length > 0 && (
+                  <ul className="mt-3 flex flex-col gap-1 border-t border-[var(--gridline)] pt-3 text-sm">
+                    {transfersOut.map((t, idx) => (
+                      <li key={`out-${t.toAccount}-${idx}`} className="flex justify-between">
+                        <span className="text-[var(--text-secondary)]">→ Transferencia a {t.toAccount}</span>
+                        <span className="tabular-nums font-medium" style={{ color: "var(--series-violet)" }}>
+                          −{formatEUR(t.monthlyAmount)}
                         </span>
                       </li>
                     ))}
