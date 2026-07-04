@@ -20,7 +20,7 @@ export function AddExpenseForm({
   const [category, setCategory] = useState<ExpenseGroup>("Fijos");
   const [property, setProperty] = useState("");
   const [label, setLabel] = useState("");
-  const [monthlyAmount, setMonthlyAmount] = useState(0);
+  const [monthlyAmount, setMonthlyAmount] = useState<number | "">("");
   const [submitting, setSubmitting] = useState(false);
 
   return (
@@ -30,7 +30,13 @@ export function AddExpenseForm({
         e.preventDefault();
         setSubmitting(true);
         try {
-          await onSubmit({ account, group: category, property: property || undefined, label, monthlyAmount });
+          await onSubmit({
+            account,
+            group: category,
+            property: property || undefined,
+            label,
+            monthlyAmount: Number(monthlyAmount),
+          });
           onCancel();
         } finally {
           setSubmitting(false);
@@ -90,7 +96,7 @@ export function AddExpenseForm({
             min={0}
             step={0.01}
             value={monthlyAmount}
-            onChange={(e) => setMonthlyAmount(Number(e.target.value))}
+            onChange={(e) => setMonthlyAmount(e.target.value === "" ? "" : Number(e.target.value))}
             className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
           />
         </Field>
