@@ -5,29 +5,27 @@
 }
 
 :root {
-  /* Superficies: página (fondo), superficie 1 (tarjetas), superficie 2 (contenido anidado) */
-  --page: #f4f5fb;
-  --surface-1: #ffffff;
-  --surface-2: #eef1fa;
-  --text-primary: #10121f;
-  --text-secondary: #4a4e64;
-  --text-muted: #676b81; /* ~5.2:1 sobre --surface-1, ~4.8:1 sobre --page */
-  --gridline: #e3e5f1;
-  --border: rgba(16, 18, 31, 0.1);
+  /* Tema oscuro fijo (no depende de prefers-color-scheme): superficies página/tarjetas/anidado */
+  --page: #0a0b12;
+  --surface-1: #14151f;
+  --surface-2: #1b1d2b;
+  --text-primary: #f5f6fb;
+  --text-secondary: #c7cadb;
+  --text-muted: #9a9db3;
+  --gridline: #262838;
+  --border: rgba(255, 255, 255, 0.1);
 
-  /* Paleta viva de datos. Cada color cumple AA (>=4.5:1) tanto como texto sobre
-     --surface-1/--page como con texto blanco encima (badges, importes). Reservada
-     para lectura de datos financieros (ingresos/gastos/ahorro/transferencias). */
-  --series-income: #2450c7; /* indigo vivo: ingresos */
-  --series-savings: #088058; /* esmeralda: ahorro/positivo */
-  --series-expense: #c2480f; /* naranja quemado: gastos */
-  --series-violet: #6a3ad0; /* violeta: transferencias/inversión */
+  /* Paleta viva de datos (versión clara, legible como texto sobre superficies oscuras). */
+  --series-income: #6690ff;
+  --series-savings: #22c98a;
+  --series-expense: #ff7a45;
+  --series-violet: #9f7ff5;
 
-  /* Texto legible sobre cada series-* usado como fondo */
-  --on-series-income: #ffffff;
-  --on-series-savings: #ffffff;
-  --on-series-expense: #ffffff;
-  --on-series-violet: #ffffff;
+  /* Los series-* son claros en modo oscuro, así que necesitan texto oscuro encima cuando se usan como fondo. */
+  --on-series-income: #1a1a1a;
+  --on-series-savings: #1a1a1a;
+  --on-series-expense: #1a1a1a;
+  --on-series-violet: #1a1a1a;
 
   /* Acentos de marca (chrome): amarillo + violeta como únicos acentos "vivos" de la
      interfaz (botones, nav activo, hero), sobre una base neutra blanco/negro (--ink/--page). */
@@ -38,59 +36,22 @@
   --accent-violet-blob: color-mix(in srgb, var(--series-violet) 88%, transparent);
   --accent-yellow-blob: color-mix(in srgb, var(--accent-yellow) 70%, transparent);
 
-  --status-good: #0a7f0a; /* oscurecido desde #0ca30c: ~3.27:1 como texto no cumplía AA, ahora ~5:1 */
+  --status-good: #0ca30c;
   --status-warning: #fab219;
   --status-serious: #ec835a;
   --status-critical: #d03b3b;
 
-  /* Color de texto legible sobre cada status-* usado como fondo (p. ej. SeverityBadge) */
-  --on-status-good: #ffffff;
+  /* --status-good es claro en modo oscuro, así que necesita texto oscuro encima */
+  --on-status-good: #1a1a1a;
   --on-status-warning: #1a1a1a;
   --on-status-critical: #ffffff;
 
   /* Tinte neutro para sombras (componentes RGB de --text-primary) */
-  --shadow-tint: 16, 18, 31;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --page: #0a0b12;
-    --surface-1: #14151f;
-    --surface-2: #1b1d2b;
-    --text-primary: #f5f6fb;
-    --text-secondary: #c7cadb;
-    --text-muted: #9a9db3;
-    --gridline: #262838;
-    --border: rgba(255, 255, 255, 0.1);
-
-    --series-income: #6690ff;
-    --series-savings: #22c98a;
-    --series-expense: #ff7a45;
-    --series-violet: #9f7ff5;
-
-    /* En modo oscuro los series-* son claros (para leerse como texto sobre superficies
-       oscuras), así que necesitan texto oscuro encima cuando se usan como fondo. */
-    --on-series-income: #1a1a1a;
-    --on-series-savings: #1a1a1a;
-    --on-series-expense: #1a1a1a;
-    --on-series-violet: #1a1a1a;
-
-    --status-good: #0ca30c;
-    --status-warning: #fab219;
-    --status-serious: #ec835a;
-    --status-critical: #d03b3b;
-
-    /* En modo oscuro --status-good es más claro, así que necesita texto oscuro encima */
-    --on-status-good: #1a1a1a;
-    --on-status-warning: #1a1a1a;
-    --on-status-critical: #ffffff;
-
-    --shadow-tint: 0, 0, 0;
-  }
+  --shadow-tint: 0, 0, 0;
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: dark;
   overflow-x: hidden;
 }
 
