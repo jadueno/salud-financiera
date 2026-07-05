@@ -122,25 +122,25 @@ export function SimuladorScreen({
             label="Ajuste de ingresos mensuales"
             value={incomeDelta}
             onChange={setIncomeDelta}
-            min={-1000}
-            max={1000}
-            step={25}
+            min={-10000}
+            max={10000}
+            step={50}
           />
           <SliderField
             label="Ajuste de gastos mensuales"
             value={expensesDelta}
             onChange={setExpensesDelta}
-            min={-1000}
-            max={1000}
-            step={25}
+            min={-10000}
+            max={10000}
+            step={50}
           />
           <SliderField
             label="Aportación extra a ahorro/inversión"
             value={extraSavingsDelta}
             onChange={setExtraSavingsDelta}
-            min={-500}
-            max={500}
-            step={25}
+            min={-10000}
+            max={10000}
+            step={50}
           />
         </div>
       </Card>
