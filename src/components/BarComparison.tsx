@@ -8,8 +8,9 @@ export interface BarComparisonItem {
 
 export function BarComparison({ items }: { items: BarComparisonItem[] }) {
   const max = Math.max(...items.map((i) => i.value), 1);
+  const summary = items.map((i) => `${i.label}: ${formatEUR(i.value)}`).join(", ");
   return (
-    <div className="flex flex-col gap-3" role="img" aria-label="Comparativa de ingresos, gastos y ahorro mensual">
+    <div className="flex flex-col gap-3" role="img" aria-label={summary}>
       {items.map((item) => (
         <div key={item.label} className="flex flex-col gap-1">
           <div className="flex items-baseline justify-between text-sm">
@@ -18,12 +19,12 @@ export function BarComparison({ items }: { items: BarComparisonItem[] }) {
               {formatEUR(item.value)}
             </span>
           </div>
-          <div className="h-3 w-full rounded-full bg-[var(--gridline)]">
+          <div className="h-3 w-full overflow-hidden rounded-full bg-[var(--gridline)]">
             <div
-              className="h-3 rounded-full transition-[width]"
+              className="h-3 rounded-full transition-[width] duration-500 ease-out"
               style={{
                 width: `${Math.max(2, (item.value / max) * 100)}%`,
-                backgroundColor: item.color,
+                background: `linear-gradient(90deg, color-mix(in srgb, ${item.color} 80%, black), ${item.color})`,
               }}
             />
           </div>

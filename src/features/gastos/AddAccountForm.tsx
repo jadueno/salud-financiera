@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { NewAccount } from "../../domain/types";
-import { Field } from "../../components/Field";
+import { Field, inputClass } from "../../components/Field";
+import { Button } from "../../components/Button";
 
 export function AddAccountForm({
   onSubmit,
@@ -36,7 +37,7 @@ export function AddAccountForm({
           autoFocus
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full max-w-xs rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+          className={`${inputClass} max-w-xs`}
         />
       </Field>
       {error && (
@@ -45,17 +46,12 @@ export function AddAccountForm({
         </p>
       )}
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-lg px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
-          style={{ backgroundColor: "var(--series-income)" }}
-        >
+        <Button type="submit" tone="ink" disabled={submitting}>
           {submitting ? "Guardando…" : "Guardar cuenta"}
-        </button>
-        <button type="button" onClick={onCancel} className="rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)]">
+        </Button>
+        <Button variant="ghost" onClick={onCancel}>
           Cancelar
-        </button>
+        </Button>
       </div>
     </form>
   );

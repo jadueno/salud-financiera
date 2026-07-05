@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
+import { Button } from "./Button";
 
 type ConfirmFn = (message: string) => Promise<boolean>;
 
@@ -35,31 +36,21 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           role="alertdialog"
           aria-modal="true"
           aria-labelledby="confirm-dialog-message"
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/50 p-4 backdrop-blur-sm"
           style={{ overscrollBehavior: "contain" }}
           onKeyDown={(e) => e.key === "Escape" && close(false)}
         >
-          <div className="w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--surface-1)] p-5 shadow-lg">
+          <div className="w-full max-w-sm rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface-1)] p-6 shadow-float">
             <p id="confirm-dialog-message" className="text-sm text-[var(--text-primary)]">
               {message}
             </p>
             <div className="mt-4 flex justify-end gap-2">
-              <button
-                type="button"
-                autoFocus
-                onClick={() => close(false)}
-                className="rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--gridline)]"
-              >
+              <Button variant="ghost" autoFocus onClick={() => close(false)}>
                 Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => close(true)}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-white"
-                style={{ backgroundColor: "var(--status-critical)" }}
-              >
+              </Button>
+              <Button tone="critical" onClick={() => close(true)}>
                 Eliminar
-              </button>
+              </Button>
             </div>
           </div>
         </div>

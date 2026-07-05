@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ExpenseGroup, NewExpenseItem } from "../../domain/types";
-import { Field } from "../../components/Field";
+import { Field, inputClass } from "../../components/Field";
+import { Button } from "../../components/Button";
 
 const categories: { value: ExpenseGroup; label: string }[] = [
   { value: "Fijos", label: "Obligatorio" },
@@ -22,6 +23,7 @@ export function AddExpenseForm({
   const [label, setLabel] = useState("");
   const [monthlyAmount, setMonthlyAmount] = useState<number | "">("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <form
@@ -29,6 +31,7 @@ export function AddExpenseForm({
       onSubmit={async (e) => {
         e.preventDefault();
         setSubmitting(true);
+        setError(null);
         try {
           await onSubmit({
             account,
@@ -38,6 +41,8 @@ export function AddExpenseForm({
             monthlyAmount: Number(monthlyAmount),
           });
           onCancel();
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "No se ha podido guardar el gasto");
         } finally {
           setSubmitting(false);
         }
@@ -49,7 +54,7 @@ export function AddExpenseForm({
             required
             value={account}
             onChange={(e) => setAccount(e.target.value)}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+            className={inputClass}
           >
             <option value="" disabled>
               Elige una cuenta
@@ -65,7 +70,7 @@ export function AddExpenseForm({
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as ExpenseGroup)}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+            className={inputClass}
           >
             {categories.map((c) => (
               <option key={c.value} value={c.value}>
@@ -78,7 +83,7 @@ export function AddExpenseForm({
           <input
             value={property}
             onChange={(e) => setProperty(e.target.value)}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+            className={inputClass}
           />
         </Field>
         <Field label="Concepto">
@@ -86,7 +91,7 @@ export function AddExpenseForm({
             required
             value={label}
             onChange={(e) => setLabel(e.target.value)}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+            className={inputClass}
           />
         </Field>
         <Field label="Importe mensual (€)">
@@ -97,22 +102,22 @@ export function AddExpenseForm({
             step={0.01}
             value={monthlyAmount}
             onChange={(e) => setMonthlyAmount(e.target.value === "" ? "" : Number(e.target.value))}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+            className={inputClass}
           />
         </Field>
       </div>
+      {error && (
+        <p className="text-xs" style={{ color: "var(--status-critical)" }}>
+          {error}
+        </p>
+      )}
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={submitting || accountNames.length === 0}
-          className="rounded-lg px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
-          style={{ backgroundColor: "var(--series-expense)" }}
-        >
+        <Button type="submit" tone="ink" disabled={submitting || accountNames.length === 0}>
           {submitting ? "Guardando…" : "Guardar gasto"}
-        </button>
-        <button type="button" onClick={onCancel} className="rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)]">
+        </Button>
+        <Button variant="ghost" onClick={onCancel}>
           Cancelar
-        </button>
+        </Button>
       </div>
       {accountNames.length === 0 && (
         <p className="text-xs" style={{ color: "var(--status-critical)" }}>

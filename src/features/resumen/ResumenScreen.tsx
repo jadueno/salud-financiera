@@ -15,7 +15,9 @@ import {
 import { Card } from "../../components/Card";
 import { BarComparison } from "../../components/BarComparison";
 import { ProgressBar } from "../../components/ProgressBar";
-import { SeverityBadge } from "../../components/StatusBadge";
+import { RecommendationTimeline } from "../../components/RecommendationTimeline";
+import { IconBadge } from "../../components/IconBadge";
+import { ExpenseIcon, SavingsIcon, TipIcon } from "../../components/icons";
 
 export function ResumenScreen({
   profile,
@@ -41,14 +43,53 @@ export function ResumenScreen({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Resumen</h1>
-        <p className="text-base font-medium text-[var(--text-secondary)]">Cómo va tu economía este mes.</p>
+        <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-4xl">Resumen</h1>
+        <p className="text-base font-normal text-[var(--text-secondary)]">Cómo va tu economía este mes.</p>
+      </div>
+
+      {/* Hero: el dato más importante del mes, destacado en el acento de marca. */}
+      <div className="relative overflow-hidden rounded-[1.75rem] bg-[var(--accent-yellow)] p-6 sm:p-8">
+        <svg
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 size-full opacity-30"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M 88 12 C 65 28, 72 50, 48 46 C 26 42, 32 70, 10 84"
+            fill="none"
+            stroke="var(--on-accent-yellow)"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+        <span aria-hidden="true" className="blob -top-12 -right-10 size-44 bg-[var(--accent-violet-blob)]" />
+        <span aria-hidden="true" className="blob -bottom-16 left-6 size-28 bg-[var(--accent-violet-blob)]" />
+        <div className="relative">
+          <p className="text-sm font-semibold text-[var(--on-accent-yellow)]">Cashflow neto este mes</p>
+          <p className="mt-2 text-4xl font-extrabold tabular-nums text-[var(--on-accent-yellow)] sm:text-5xl">
+            {formatEUR(net)}
+            <span className="ml-1 text-lg font-semibold">/mes</span>
+          </p>
+          {net !== 0 && (
+            <span
+              className="mt-4 inline-flex items-center rounded-full bg-[var(--surface-1)] px-3 py-1 text-sm font-bold shadow-card"
+              style={{ color: net < 0 ? "var(--status-critical)" : "var(--status-good)" }}
+            >
+              {net < 0 ? "Te faltan" : "Te sobran"} {formatEUR(Math.abs(net))}
+            </span>
+          )}
+        </div>
       </div>
 
       <Card>
-        <h2 className="mb-4 text-sm font-semibold text-[var(--text-primary)]">
-          Ingresos, gastos y ahorro mensual
-        </h2>
+        <div className="mb-4 flex items-center gap-3">
+          <IconBadge icon={ExpenseIcon} tone="income" />
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+            Ingresos, gastos y ahorro mensual
+          </h2>
+        </div>
         <BarComparison
           items={[
             { label: "Ingresos", value: income, color: "var(--series-income)" },
@@ -56,20 +97,22 @@ export function ResumenScreen({
             { label: "Ahorro e inversión", value: savings, color: "var(--series-savings)" },
           ]}
         />
-        <p className="mt-4 text-sm text-[var(--text-secondary)]">
-          Cashflow neto (ingresos − gastos):{" "}
-          <span className="font-semibold text-[var(--text-primary)]">{formatEUR(net)}</span>/mes
-        </p>
       </Card>
 
       <div className="grid gap-6 sm:grid-cols-2">
         <Card>
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Fondo de emergencia</h2>
-          <p className="mt-1 text-xs text-[var(--text-muted)]">
+          <div className="flex items-center gap-3">
+            <IconBadge icon={SavingsIcon} tone="savings" size="sm" />
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Fondo de emergencia</h2>
+          </div>
+          <p className="mt-2 text-xs text-[var(--text-muted)]">
             Objetivo: {profile.emergencyFund.targetMonths} meses de gastos ({formatEUR(efTarget)})
           </p>
           <div className="mt-3">
-            <ProgressBar progress={efProgress} />
+            <ProgressBar
+              progress={efProgress}
+              label={`Fondo de emergencia: ${Math.round(efProgress * 100)}% completado`}
+            />
           </div>
           <p className="mt-2 text-sm font-medium text-[var(--text-primary)]">
             {Math.round(efProgress * 100)}% completado
@@ -77,11 +120,14 @@ export function ResumenScreen({
         </Card>
 
         <Card>
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Patrimonio neto recomendado</h2>
-          <p className="mt-1 text-xs text-[var(--text-muted)]">
+          <div className="flex items-center gap-3">
+            <IconBadge icon={TipIcon} tone="violet" size="sm" />
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Patrimonio neto recomendado</h2>
+          </div>
+          <p className="mt-2 text-xs text-[var(--text-muted)]">
             Según tu edad ({profile.age} años) e ingresos anuales
           </p>
-          <p className="mt-3 text-2xl font-semibold tabular-nums text-[var(--text-primary)]">
+          <p className="mt-3 text-2xl font-extrabold tabular-nums text-[var(--text-primary)]">
             {formatEUR(recommendedNetWorth(profile))}
           </p>
           <p className="mt-1 text-xs text-[var(--text-muted)]">
@@ -91,18 +137,14 @@ export function ResumenScreen({
       </div>
 
       <Card>
-        <h2 className="mb-3 text-sm font-semibold text-[var(--text-primary)]">Qué deberías mirar</h2>
-        <ul className="flex flex-col gap-3">
-          {topRecommendations.map((rec) => (
-            <li key={rec.title} className="flex flex-col gap-1.5 border-t border-[var(--gridline)] pt-3 first:border-t-0 first:pt-0">
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-medium text-[var(--text-primary)]">{rec.title}</span>
-                <SeverityBadge severity={rec.severity} />
-              </div>
-              <p className="text-sm text-[var(--text-secondary)]">{rec.detail}</p>
-            </li>
-          ))}
-        </ul>
+        <h2 className="mb-4 text-sm font-semibold text-[var(--text-primary)]">Qué deberías mirar</h2>
+        {topRecommendations.length === 0 ? (
+          <p className="text-sm text-[var(--text-muted)]">
+            Todo en orden por ahora: no tenemos ninguna recomendación pendiente para ti.
+          </p>
+        ) : (
+          <RecommendationTimeline items={topRecommendations} />
+        )}
       </Card>
     </div>
   );

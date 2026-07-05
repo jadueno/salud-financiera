@@ -123,6 +123,10 @@ export function useFinancialData() {
       await trackerClient.create(entity);
       await reload();
     },
+    updateTracker: async (id: string, entity: NewSavingsTracker) => {
+      await trackerClient.update(id, entity);
+      await reload();
+    },
     removeTracker: async (id: string) => {
       await trackerClient.remove(id);
       await reload();

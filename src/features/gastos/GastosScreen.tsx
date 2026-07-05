@@ -2,6 +2,10 @@ import { useState } from "react";
 import type { Account, FinancialProfile, NewAccount, NewExpenseItem, NewIncomeSource, NewTransfer } from "../../domain/types";
 import { balanceByAccount, formatEUR, totalMonthlyExpenses, totalMonthlyIncome } from "../../domain/calculations";
 import { Card } from "../../components/Card";
+import { Button } from "../../components/Button";
+import { IconBadge } from "../../components/IconBadge";
+import { IncomeIcon } from "../../components/icons";
+import { focusRing } from "../../components/Field";
 import { useConfirm } from "../../components/ConfirmProvider";
 import { AddIncomeForm } from "./AddIncomeForm";
 import { AddExpenseForm } from "./AddExpenseForm";
@@ -75,8 +79,10 @@ export function GastosScreen({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Ingresos y Gastos</h1>
-        <p className="text-base font-medium text-[var(--text-secondary)]">
+        <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-4xl">
+          Ingresos y Gastos
+        </h1>
+        <p className="text-base font-normal text-[var(--text-secondary)]">
           Ingresas <strong className="font-bold text-[var(--text-primary)]">{formatEUR(totalIncome)}</strong>{" "}
           y te queda por pagar{" "}
           <strong className="font-bold text-[var(--text-primary)]">{formatEUR(totalExpenses)}</strong> al mes.
@@ -93,13 +99,16 @@ export function GastosScreen({
       </div>
 
       <Card>
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Ingresos</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-3">
+            <IconBadge icon={IncomeIcon} tone="income" size="sm" />
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Ingresos</h2>
+          </div>
           <p className="text-xl font-bold tabular-nums" style={{ color: "var(--series-income)" }}>
             {formatEUR(totalIncome)}
           </p>
         </div>
-        <p className="mt-1 text-xs text-[var(--text-muted)]">
+        <p className="mt-2 text-xs text-[var(--text-muted)]">
           Edita, añade o quita cualquier ingreso: el resto de la app (cuentas, ahorro, deudas,
           recomendaciones) se recalcula solo.
         </p>
@@ -124,14 +133,14 @@ export function GastosScreen({
                       monthlyAmount: Number(e.target.value),
                     })
                   }
-                  className="w-28 rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-right text-sm tabular-nums text-[var(--text-primary)] focus:outline-2 focus:outline-offset-2 focus:outline-[var(--series-income)]"
+                  className={`w-28 rounded-2xl border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-right text-sm tabular-nums text-[var(--text-primary)] ${focusRing}`}
                 />
                 <span className="text-sm text-[var(--text-muted)]">€</span>
                 <button
                   type="button"
                   onClick={() => handleRemoveIncome(income.label, income.id)}
                   aria-label={`Eliminar ingreso ${income.label}`}
-                  className="ml-1 text-xs text-[var(--text-muted)] hover:text-[var(--status-critical)]"
+                  className={`ml-1 rounded-lg px-2 py-1.5 text-xs text-[var(--text-muted)] transition-colors hover:bg-[var(--gridline)] hover:text-[var(--status-critical)] ${focusRing}`}
                 >
                   Eliminar
                 </button>
@@ -143,45 +152,40 @@ export function GastosScreen({
         {openForm === "income" ? (
           <AddIncomeForm accountNames={accountNames} onSubmit={onAddIncome} onCancel={() => setOpenForm(null)} />
         ) : (
-          <button
-            type="button"
-            onClick={() => setOpenForm("income")}
-            className="mt-4 rounded-lg px-3 py-2 text-sm font-medium text-white"
-            style={{ backgroundColor: "var(--series-income)" }}
-          >
+          <Button tone="ink" className="mt-4" onClick={() => setOpenForm("income")}>
             + Añadir ingreso
-          </button>
+          </Button>
         )}
       </Card>
 
       <div>
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Por cuenta bancaria</h2>
-          <div className="flex gap-2">
-            <button
-              type="button"
+          <div className="flex flex-wrap gap-2">
+            <Button
+              tone="savings"
+              variant="tint"
+              size="sm"
               onClick={() => setOpenForm(openForm === "account" ? null : "account")}
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-white"
-              style={{ backgroundColor: "var(--series-savings)" }}
             >
               + Añadir cuenta
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              tone="expense"
+              variant="tint"
+              size="sm"
               onClick={() => setOpenForm(openForm === "expense" ? null : "expense")}
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-white"
-              style={{ backgroundColor: "var(--series-expense)" }}
             >
               + Añadir gasto
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              tone="violet"
+              variant="tint"
+              size="sm"
               onClick={() => setOpenForm(openForm === "transfer" ? null : "transfer")}
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-white"
-              style={{ backgroundColor: "var(--series-violet)" }}
             >
               + Añadir transferencia
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -225,7 +229,7 @@ export function GastosScreen({
                       <button
                         type="button"
                         onClick={() => handleRemoveAccount(accountEntity)}
-                        className="text-xs text-[var(--text-muted)] hover:text-[var(--status-critical)]"
+                        className={`rounded-lg px-2 py-1 text-xs text-[var(--text-muted)] transition-colors hover:bg-[var(--gridline)] hover:text-[var(--status-critical)] ${focusRing}`}
                       >
                         Eliminar cuenta
                       </button>
@@ -338,7 +342,7 @@ function DeleteButton({ onClick, label }: { onClick: () => void; label: string }
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="text-xs text-[var(--text-muted)] hover:text-[var(--status-critical)]"
+      className={`flex size-6 items-center justify-center rounded-lg text-sm text-[var(--text-muted)] transition-colors hover:bg-[var(--gridline)] hover:text-[var(--status-critical)] ${focusRing}`}
     >
       ×
     </button>

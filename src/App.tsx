@@ -6,6 +6,8 @@ import { DeudasScreen } from "./features/deudas/DeudasScreen";
 import { AhorroScreen } from "./features/ahorro/AhorroScreen";
 import { RecomendacionesScreen } from "./features/recomendaciones/RecomendacionesScreen";
 import { HomeIcon, ExpenseIcon, DebtIcon, SavingsIcon, TipIcon } from "./components/icons";
+import { LoadingState } from "./components/LoadingState";
+import { BrandMark } from "./components/BrandMark";
 
 type Section = "resumen" | "gastos" | "deudas" | "ahorro" | "recomendaciones";
 
@@ -27,24 +29,25 @@ export default function App() {
   const data = useFinancialData();
 
   return (
-    <div className="flex min-h-screen flex-col sm:flex-row">
+    <div className="app-shell flex min-h-screen flex-col sm:flex-row">
       {/* Sidebar de escritorio */}
       <nav
         aria-label="Secciones de la app"
-        className="hidden shrink-0 flex-col gap-1 border-r border-[var(--border)] bg-[var(--surface-1)] p-4 sm:flex sm:h-screen sm:w-56"
+        className="hidden shrink-0 flex-col gap-1 border-r border-[var(--border)] bg-[var(--surface-1)] p-4 sm:flex sm:h-screen sm:w-60"
       >
-        <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-          Salud financiera
-        </p>
+        <div className="mb-4 flex items-center gap-2.5 px-2">
+          <BrandMark />
+          <p className="text-sm leading-tight font-bold text-[var(--text-primary)]">Rumbo</p>
+        </div>
         {sections.map((s) => (
           <button
             key={s.id}
             type="button"
             onClick={() => setSection(s.id)}
             aria-current={section === s.id ? "page" : undefined}
-            className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--series-income)] ${
+            className={`flex items-center gap-2.5 rounded-full px-4 py-2.5 text-left text-sm font-semibold whitespace-nowrap transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--series-income)] ${
               section === s.id
-                ? "bg-[var(--series-income)] text-white"
+                ? "bg-[var(--ink)] text-[var(--on-ink)]"
                 : "text-[var(--text-secondary)] hover:bg-[var(--gridline)]"
             }`}
           >
@@ -54,21 +57,23 @@ export default function App() {
         ))}
       </nav>
 
-      <main className="flex-1 p-4 pb-24 sm:p-8 sm:pb-8">
+      <main className="relative flex-1 p-4 pb-24 sm:p-8 sm:pb-8">
         <div className="mx-auto max-w-3xl">
           {data.error && (
             <div
               role="alert"
-              className="mb-4 rounded-xl border p-4 text-sm"
-              style={{ borderColor: "var(--status-critical)", color: "var(--status-critical)" }}
+              className="mb-4 rounded-[1.75rem] border p-4 text-sm shadow-card"
+              style={{
+                borderColor: "var(--status-critical)",
+                color: "var(--status-critical)",
+                backgroundColor: "color-mix(in srgb, var(--status-critical) 8%, var(--surface-1))",
+              }}
             >
               No se ha podido conectar con el backend ({data.error}). ¿Está corriendo{" "}
               <code>npm run dev</code> dentro de <code>backend/</code>?
             </div>
           )}
-          {!data.profile && !data.error && (
-            <p className="text-sm text-[var(--text-muted)]">Cargando datos…</p>
-          )}
+          {!data.profile && !data.error && <LoadingState />}
           {data.profile && (
             <>
               {section === "resumen" && (
@@ -98,6 +103,7 @@ export default function App() {
                   accounts={data.accounts}
                   trackers={data.trackers}
                   onAddTracker={data.addTracker}
+                  onUpdateTracker={data.updateTracker}
                   onRemoveTracker={data.removeTracker}
                 />
               )}
@@ -112,23 +118,24 @@ export default function App() {
       {/* Barra de navegación inferior en móvil */}
       <nav
         aria-label="Secciones de la app"
-        className="fixed inset-x-0 bottom-0 z-10 flex border-t border-[var(--border)] bg-[var(--surface-1)] pb-[env(safe-area-inset-bottom)] sm:hidden"
+        className="fixed inset-x-0 bottom-0 z-10 pb-[env(safe-area-inset-bottom)] sm:hidden"
       >
-        {sections.map((s) => (
-          <button
-            key={s.id}
-            type="button"
-            onClick={() => setSection(s.id)}
-            aria-current={section === s.id ? "page" : undefined}
-            className="flex flex-1 flex-col items-center gap-1 px-1 py-2 text-[11px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--series-income)]"
-            style={{
-              color: section === s.id ? "var(--series-income)" : "var(--text-muted)",
-            }}
-          >
-            <s.icon className="size-6 shrink-0" />
-            <span className="leading-tight">{s.shortLabel}</span>
-          </button>
-        ))}
+        <div className="mx-3 mb-3 flex justify-around rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface-1)]/90 px-1 py-1.5 shadow-float backdrop-blur-md">
+          {sections.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setSection(s.id)}
+              aria-current={section === s.id ? "page" : undefined}
+              className={`flex flex-1 flex-col items-center gap-0.5 rounded-full px-1 py-1.5 text-[11px] font-semibold transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--series-income)] ${
+                section === s.id ? "bg-[var(--ink)] text-[var(--on-ink)]" : "text-[var(--text-muted)]"
+              }`}
+            >
+              <s.icon className="size-5 shrink-0" />
+              <span className="leading-tight">{s.shortLabel}</span>
+            </button>
+          ))}
+        </div>
       </nav>
     </div>
   );

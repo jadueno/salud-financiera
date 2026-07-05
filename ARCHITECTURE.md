@@ -4,7 +4,7 @@ Este documento explica cómo está construida la aplicación y por qué, pensado
 
 ## Visión general
 
-Es una aplicación de salud financiera personal: dashboard, ingresos, gastos, deudas, ahorro/inversión y recomendaciones automáticas, con CRUD completo (crear/editar/borrar con confirmación) sobre ingresos, gastos, deudas, transferencias y cuentas bancarias. Todo el estado vive en una base de datos real, no en memoria ni en `localStorage` — cualquier cambio persiste y se recalcula en cascada por toda la app.
+Rumbo es una aplicación de salud financiera personal: dashboard, ingresos, gastos, deudas, ahorro/inversión y recomendaciones automáticas, con CRUD completo (crear/editar/borrar con confirmación) sobre ingresos, gastos, deudas, transferencias y cuentas bancarias. Todo el estado vive en una base de datos real, no en memoria ni en `localStorage` — cualquier cambio persiste y se recalcula en cascada por toda la app.
 
 ```
 Frontend (React + TS)  ──HTTP/JSON──▶  Backend (Fastify + TS)  ──SQL──▶  PostgreSQL

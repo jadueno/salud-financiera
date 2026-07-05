@@ -1,14 +1,22 @@
 import { useState } from "react";
 import type { NewDebt } from "../../domain/types";
 import { Card } from "../../components/Card";
-import { Field } from "../../components/Field";
+import { Field, inputClass } from "../../components/Field";
+import { Button } from "../../components/Button";
 
-export function AddDebtForm({ onSubmit }: { onSubmit: (debt: NewDebt) => Promise<void> }) {
+export function AddDebtForm({
+  onSubmit,
+  onCancel,
+}: {
+  onSubmit: (debt: NewDebt) => Promise<void>;
+  onCancel: () => void;
+}) {
   const [name, setName] = useState("");
-  const [monthlyPayment, setMonthlyPayment] = useState(0);
+  const [monthlyPayment, setMonthlyPayment] = useState<number | "">("");
   const [dueDate, setDueDate] = useState("");
   const [remainingBalance, setRemainingBalance] = useState<number | "">("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <Card>
@@ -17,14 +25,17 @@ export function AddDebtForm({ onSubmit }: { onSubmit: (debt: NewDebt) => Promise
         onSubmit={async (e) => {
           e.preventDefault();
           setSubmitting(true);
+          setError(null);
           try {
             await onSubmit({
               name,
-              monthlyPayment,
+              monthlyPayment: Number(monthlyPayment),
               dueDate,
               remainingBalance: remainingBalance === "" ? undefined : remainingBalance,
               balanceAsOf: remainingBalance === "" ? undefined : new Date().toISOString().slice(0, 7),
             });
+          } catch (err) {
+            setError(err instanceof Error ? err.message : "No se ha podido guardar la deuda");
           } finally {
             setSubmitting(false);
           }
@@ -37,7 +48,7 @@ export function AddDebtForm({ onSubmit }: { onSubmit: (debt: NewDebt) => Promise
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+              className={inputClass}
             />
           </Field>
           <Field label="Cuota mensual (€)">
@@ -47,8 +58,8 @@ export function AddDebtForm({ onSubmit }: { onSubmit: (debt: NewDebt) => Promise
               min={0}
               step={0.01}
               value={monthlyPayment}
-              onChange={(e) => setMonthlyPayment(Number(e.target.value))}
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+              onChange={(e) => setMonthlyPayment(e.target.value === "" ? "" : Number(e.target.value))}
+              className={inputClass}
             />
           </Field>
           <Field label="Hasta (MM/YYYY)">
@@ -57,7 +68,7 @@ export function AddDebtForm({ onSubmit }: { onSubmit: (debt: NewDebt) => Promise
               placeholder="MM/AAAA"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+              className={inputClass}
             />
           </Field>
           <Field label="Saldo pendiente (€, opcional)">
@@ -67,18 +78,23 @@ export function AddDebtForm({ onSubmit }: { onSubmit: (debt: NewDebt) => Promise
               step={0.01}
               value={remainingBalance}
               onChange={(e) => setRemainingBalance(e.target.value === "" ? "" : Number(e.target.value))}
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+              className={inputClass}
             />
           </Field>
         </div>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="self-start rounded-lg px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
-          style={{ backgroundColor: "var(--series-income)" }}
-        >
-          {submitting ? "Guardando…" : "Guardar deuda"}
-        </button>
+        {error && (
+          <p className="text-xs" style={{ color: "var(--status-critical)" }}>
+            {error}
+          </p>
+        )}
+        <div className="flex gap-2">
+          <Button type="submit" tone="ink" className="self-start" disabled={submitting}>
+            {submitting ? "Guardando…" : "Guardar deuda"}
+          </Button>
+          <Button variant="ghost" onClick={onCancel}>
+            Cancelar
+          </Button>
+        </div>
       </form>
     </Card>
   );

@@ -15,6 +15,16 @@ function validate(entity: NewSavingsTracker): void {
 }
 
 export function createSavingsTrackerUseCases(repo: Repository<SavingsTracker, NewSavingsTracker>) {
+  async function assertAccountFree(entity: NewSavingsTracker, excludeId?: string): Promise<void> {
+    const existing = await repo.list();
+    const conflict = existing.find((t) => t.id !== excludeId && t.account === entity.account);
+    if (conflict) {
+      throw new ValidationError(
+        `La cuenta "${entity.account}" ya está vinculada a otro seguimiento ("${conflict.name}"). Usa una cuenta distinta para no contar el mismo dinero dos veces.`,
+      );
+    }
+  }
+
   return {
     list: () => repo.list(),
 
@@ -26,11 +36,13 @@ export function createSavingsTrackerUseCases(repo: Repository<SavingsTracker, Ne
           throw new ValidationError("Ya existe un fondo de emergencia. Bórralo primero si quieres cambiar de cuenta.");
         }
       }
+      await assertAccountFree(entity);
       return repo.create(entity);
     },
 
-    update: (id: string, entity: NewSavingsTracker) => {
+    update: async (id: string, entity: NewSavingsTracker) => {
       validate(entity);
+      await assertAccountFree(entity, id);
       return repo.update(id, entity);
     },
 

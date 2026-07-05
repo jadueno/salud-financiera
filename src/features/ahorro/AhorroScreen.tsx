@@ -12,22 +12,36 @@ import {
   savingsRate,
 } from "../../domain/calculations";
 import { Card } from "../../components/Card";
+import { Button } from "../../components/Button";
+import { IconBadge } from "../../components/IconBadge";
+import { SavingsIcon, IncomeIcon } from "../../components/icons";
+import { focusRing } from "../../components/Field";
 import { ProgressBar } from "../../components/ProgressBar";
 import { useConfirm } from "../../components/ConfirmProvider";
 import { SetupEmergencyFundForm } from "./SetupEmergencyFundForm";
 import { AddInvestmentForm } from "./AddInvestmentForm";
+import { EditTrackerForm } from "./EditTrackerForm";
 
 interface Props {
   profile: FinancialProfile;
   accounts: Account[];
   trackers: SavingsTracker[];
   onAddTracker: (tracker: NewSavingsTracker) => Promise<void>;
+  onUpdateTracker: (id: string, tracker: NewSavingsTracker) => Promise<void>;
   onRemoveTracker: (id: string) => Promise<void>;
 }
 
-export function AhorroScreen({ profile, accounts, trackers, onAddTracker, onRemoveTracker }: Props) {
+export function AhorroScreen({
+  profile,
+  accounts,
+  trackers,
+  onAddTracker,
+  onUpdateTracker,
+  onRemoveTracker,
+}: Props) {
   const confirm = useConfirm();
   const [showAddInvestment, setShowAddInvestment] = useState(false);
+  const [editingTrackerId, setEditingTrackerId] = useState<string | null>(null);
 
   const accountNames = accounts.map((a) => a.name);
   const accountBalances = balanceByAccount(profile, accountNames);
@@ -49,8 +63,10 @@ export function AhorroScreen({ profile, accounts, trackers, onAddTracker, onRemo
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Ahorro e inversión</h1>
-        <p className="text-base font-medium text-[var(--text-secondary)]">
+        <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-4xl">
+          Ahorro e inversión
+        </h1>
+        <p className="text-base font-normal text-[var(--text-secondary)]">
           Tasa de ahorro/inversión:{" "}
           <strong className="font-bold text-[var(--text-primary)]">{Math.round(rate * 100)}%</strong> de tus
           ingresos.
@@ -58,8 +74,11 @@ export function AhorroScreen({ profile, accounts, trackers, onAddTracker, onRemo
       </div>
 
       <Card>
-        <h2 className="text-sm font-semibold text-[var(--text-primary)]">Fondo de emergencia</h2>
-        <p className="mt-1 text-xs text-[var(--text-muted)]">
+        <div className="flex items-center gap-3">
+          <IconBadge icon={SavingsIcon} tone="savings" size="sm" />
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Fondo de emergencia</h2>
+        </div>
+        <p className="mt-2 text-xs text-[var(--text-muted)]">
           Objetivo: {profile.emergencyFund.targetMonths} meses de gastos ({formatEUR(efTarget)}).
         </p>
 
@@ -75,16 +94,36 @@ export function AhorroScreen({ profile, accounts, trackers, onAddTracker, onRemo
                   {formatMonth(efTrackerEntity.initialBalanceAsOf)}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => handleRemoveTracker(efTrackerEntity.name, efTrackerEntity.id)}
-                className="text-xs text-[var(--text-muted)] hover:text-[var(--status-critical)]"
-              >
-                Dejar de seguir
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingTrackerId((v) => (v === efTrackerEntity.id ? null : efTrackerEntity.id))}
+                  className={`rounded-lg px-2 py-1 text-xs text-[var(--text-muted)] transition-colors hover:bg-[var(--gridline)] hover:text-[var(--text-primary)] ${focusRing}`}
+                >
+                  {editingTrackerId === efTrackerEntity.id ? "Cerrar" : "Editar"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveTracker(efTrackerEntity.name, efTrackerEntity.id)}
+                  className={`rounded-lg px-2 py-1 text-xs text-[var(--text-muted)] transition-colors hover:bg-[var(--gridline)] hover:text-[var(--status-critical)] ${focusRing}`}
+                >
+                  Dejar de seguir
+                </button>
+              </div>
             </div>
+            {editingTrackerId === efTrackerEntity.id && (
+              <EditTrackerForm
+                tracker={efTrackerEntity}
+                accountNames={accountNames}
+                onSubmit={onUpdateTracker}
+                onCancel={() => setEditingTrackerId(null)}
+              />
+            )}
             <div className="mt-4">
-              <ProgressBar progress={efProgress} />
+              <ProgressBar
+                progress={efProgress}
+                label={`Fondo de emergencia: ${Math.round(efProgress * 100)}% completado`}
+              />
               <p className="mt-2 text-sm font-medium text-[var(--text-primary)]">
                 {Math.round(efProgress * 100)}% completado
               </p>
@@ -98,18 +137,16 @@ export function AhorroScreen({ profile, accounts, trackers, onAddTracker, onRemo
       </Card>
 
       <Card>
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Inversiones</h2>
-          <button
-            type="button"
-            onClick={() => setShowAddInvestment((v) => !v)}
-            className="rounded-lg px-3 py-1.5 text-sm font-medium text-white"
-            style={{ backgroundColor: "var(--series-violet)" }}
-          >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-3">
+            <IconBadge icon={IncomeIcon} tone="violet" size="sm" />
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Inversiones</h2>
+          </div>
+          <Button tone="ink" size="sm" onClick={() => setShowAddInvestment((v) => !v)}>
             {showAddInvestment ? "Cancelar" : "+ Añadir inversión"}
-          </button>
+          </Button>
         </div>
-        <p className="mt-1 text-xs text-[var(--text-muted)]">
+        <p className="mt-2 text-xs text-[var(--text-muted)]">
           Cada inversión suma sola, mes a mes, según lo que entre en la cuenta a la que está vinculada.
         </p>
 
@@ -128,17 +165,29 @@ export function AhorroScreen({ profile, accounts, trackers, onAddTracker, onRemo
             {investments.map((tracker) => {
               const monthlyRate = accountBalances.find((a) => a.account === tracker.account)?.balance ?? 0;
               return (
-                <div key={tracker.id} className="rounded-xl border border-[var(--border)] p-4">
+                <div
+                  key={tracker.id}
+                  className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4"
+                >
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold text-[var(--text-primary)]">{tracker.name}</h3>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTracker(tracker.name, tracker.id)}
-                      aria-label={`Eliminar inversión ${tracker.name}`}
-                      className="text-xs text-[var(--text-muted)] hover:text-[var(--status-critical)]"
-                    >
-                      Eliminar
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setEditingTrackerId((v) => (v === tracker.id ? null : tracker.id))}
+                        className={`rounded-lg px-2 py-1 text-xs text-[var(--text-muted)] transition-colors hover:bg-[var(--gridline)] hover:text-[var(--text-primary)] ${focusRing}`}
+                      >
+                        {editingTrackerId === tracker.id ? "Cerrar" : "Editar"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTracker(tracker.name, tracker.id)}
+                        aria-label={`Eliminar inversión ${tracker.name}`}
+                        className={`rounded-lg px-2 py-1 text-xs text-[var(--text-muted)] transition-colors hover:bg-[var(--gridline)] hover:text-[var(--status-critical)] ${focusRing}`}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
                   </div>
                   <p className="text-xs text-[var(--text-muted)]">{tracker.account}</p>
                   <p className="mt-2 text-xl font-bold tabular-nums" style={{ color: "var(--series-violet)" }}>
@@ -147,9 +196,21 @@ export function AhorroScreen({ profile, accounts, trackers, onAddTracker, onRemo
                   <p className="mt-1 text-xs text-[var(--text-muted)]">
                     Partiendo de {formatEUR(tracker.initialBalance)} en {formatMonth(tracker.initialBalanceAsOf)}
                   </p>
-                  <p className="mt-1 text-sm font-medium" style={{ color: "var(--series-savings)" }}>
-                    +{formatEUR(monthlyRate)}/mes
+                  <p
+                    className="mt-1 text-sm font-medium"
+                    style={{ color: monthlyRate >= 0 ? "var(--series-savings)" : "var(--status-critical)" }}
+                  >
+                    {monthlyRate >= 0 ? "+" : ""}
+                    {formatEUR(monthlyRate)}/mes
                   </p>
+                  {editingTrackerId === tracker.id && (
+                    <EditTrackerForm
+                      tracker={tracker}
+                      accountNames={accountNames}
+                      onSubmit={onUpdateTracker}
+                      onCancel={() => setEditingTrackerId(null)}
+                    />
+                  )}
                 </div>
               );
             })}

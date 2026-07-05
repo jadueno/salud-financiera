@@ -1,4 +1,4 @@
-# Salud Financiera
+# Rumbo
 
 App personal (un solo usuario) para ver de un vistazo cómo va tu economía: ingresos, gastos, deudas, ahorro/inversión y recomendaciones. Ingresos, gastos, deudas, transferencias y cuentas se pueden añadir/editar/borrar libremente (con confirmación antes de borrar) — se guardan en una base de datos Postgres local, así que puedes "jugar" con los números sin miedo a romper nada real.
 

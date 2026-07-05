@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { NewSavingsTracker } from "../../domain/types";
-import { Field } from "../../components/Field";
+import { Field, inputClass } from "../../components/Field";
+import { Button } from "../../components/Button";
 
 export function SetupEmergencyFundForm({
   accountNames,
@@ -46,7 +47,7 @@ export function SetupEmergencyFundForm({
             required
             value={account}
             onChange={(e) => setAccount(e.target.value)}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+            className={inputClass}
           >
             <option value="" disabled>
               Elige una cuenta
@@ -66,7 +67,7 @@ export function SetupEmergencyFundForm({
             step={0.01}
             value={initialBalance}
             onChange={(e) => setInitialBalance(e.target.value === "" ? "" : Number(e.target.value))}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+            className={inputClass}
           />
         </Field>
       </div>
@@ -75,14 +76,9 @@ export function SetupEmergencyFundForm({
           {error}
         </p>
       )}
-      <button
-        type="submit"
-        disabled={submitting || accountNames.length === 0}
-        className="self-start rounded-lg px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
-        style={{ backgroundColor: "var(--series-savings)" }}
-      >
+      <Button type="submit" tone="ink" className="self-start" disabled={submitting || accountNames.length === 0}>
         {submitting ? "Guardando…" : "Empezar a seguir el fondo de emergencia"}
-      </button>
+      </Button>
       {accountNames.length === 0 && (
         <p className="text-xs" style={{ color: "var(--status-critical)" }}>
           Primero crea una cuenta en "Ingresos y Gastos".

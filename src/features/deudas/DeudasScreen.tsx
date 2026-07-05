@@ -9,6 +9,8 @@ import {
   totalMonthlyIncome,
 } from "../../domain/calculations";
 import { Card } from "../../components/Card";
+import { Button } from "../../components/Button";
+import { focusRing } from "../../components/Field";
 import { useConfirm } from "../../components/ConfirmProvider";
 import { AddDebtForm } from "./AddDebtForm";
 
@@ -38,21 +40,16 @@ export function DeudasScreen({
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Deudas</h1>
-          <p className="text-base font-medium text-[var(--text-secondary)]">
+          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-4xl">Deudas</h1>
+          <p className="text-base font-normal text-[var(--text-secondary)]">
             <strong className="font-bold text-[var(--text-primary)]">{formatEUR(totalPayments)}</strong>/mes en
             cuotas · <strong className="font-bold text-[var(--text-primary)]">{Math.round(debtLoad * 100)}%</strong>{" "}
             de tus ingresos
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowForm((v) => !v)}
-          className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium text-white"
-          style={{ backgroundColor: "var(--series-income)" }}
-        >
+        <Button tone={showForm ? "neutral" : "ink"} onClick={() => setShowForm((v) => !v)}>
           {showForm ? "Cancelar" : "+ Añadir deuda"}
-        </button>
+        </Button>
       </div>
 
       {showForm && (
@@ -61,6 +58,7 @@ export function DeudasScreen({
             await onAddDebt(debt);
             setShowForm(false);
           }}
+          onCancel={() => setShowForm(false)}
         />
       )}
 
@@ -74,7 +72,7 @@ export function DeudasScreen({
             style={{
               borderWidth: 2,
               borderColor: "var(--series-expense)",
-              backgroundColor: "color-mix(in srgb, var(--series-expense) 10%, var(--surface-1))",
+              backgroundColor: "color-mix(in srgb, var(--series-expense) 8%, var(--surface-1))",
             }}
           >
             <h2 className="text-sm font-semibold text-[var(--text-primary)]">Saldo pendiente total (estimado)</h2>
@@ -83,7 +81,7 @@ export function DeudasScreen({
               desde el último dato real. No cuenta intereses.
             </p>
             <p
-              className="mt-3 text-4xl font-bold tabular-nums"
+              className="mt-3 text-4xl font-extrabold tabular-nums"
               style={{ color: "var(--series-expense)" }}
             >
               {formatEUR(totalRemaining)}
@@ -101,7 +99,7 @@ export function DeudasScreen({
                       type="button"
                       onClick={() => handleRemove(debt.name, debt.id)}
                       aria-label={`Eliminar deuda ${debt.name}`}
-                      className="text-xs text-[var(--text-muted)] hover:text-[var(--status-critical)]"
+                      className={`rounded-lg px-2 py-1 text-xs text-[var(--text-muted)] transition-colors hover:bg-[var(--gridline)] hover:text-[var(--status-critical)] ${focusRing}`}
                     >
                       Eliminar
                     </button>

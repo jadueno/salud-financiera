@@ -1,48 +1,91 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
 }
 
 :root {
-  --surface-1: #fcfcfb;
-  --page: #f9f9f7;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #898781;
-  --gridline: #e1e0d9;
-  --border: rgba(11, 11, 11, 0.1);
+  /* Superficies: página (fondo), superficie 1 (tarjetas), superficie 2 (contenido anidado) */
+  --page: #f4f5fb;
+  --surface-1: #ffffff;
+  --surface-2: #eef1fa;
+  --text-primary: #10121f;
+  --text-secondary: #4a4e64;
+  --text-muted: #676b81; /* ~5.2:1 sobre --surface-1, ~4.8:1 sobre --page */
+  --gridline: #e3e5f1;
+  --border: rgba(16, 18, 31, 0.1);
 
-  --series-income: #2a78d6; /* blue */
-  --series-savings: #1baf7a; /* aqua */
-  --series-expense: #eb6834; /* orange */
-  --series-violet: #4a3aa7; /* transferencias internas */
+  /* Paleta viva de datos. Cada color cumple AA (>=4.5:1) tanto como texto sobre
+     --surface-1/--page como con texto blanco encima (badges, importes). Reservada
+     para lectura de datos financieros (ingresos/gastos/ahorro/transferencias). */
+  --series-income: #2450c7; /* indigo vivo: ingresos */
+  --series-savings: #088058; /* esmeralda: ahorro/positivo */
+  --series-expense: #c2480f; /* naranja quemado: gastos */
+  --series-violet: #6a3ad0; /* violeta: transferencias/inversión */
 
-  --status-good: #0ca30c;
+  /* Texto legible sobre cada series-* usado como fondo */
+  --on-series-income: #ffffff;
+  --on-series-savings: #ffffff;
+  --on-series-expense: #ffffff;
+  --on-series-violet: #ffffff;
+
+  /* Acentos de marca (chrome): amarillo + violeta como únicos acentos "vivos" de la
+     interfaz (botones, nav activo, hero), sobre una base neutra blanco/negro (--ink/--page). */
+  --ink: var(--text-primary);
+  --on-ink: var(--page);
+  --accent-yellow: #f5c518;
+  --on-accent-yellow: #10121f; /* ink fijo: el amarillo es igual de claro en ambos temas */
+  --accent-violet-blob: color-mix(in srgb, var(--series-violet) 88%, transparent);
+  --accent-yellow-blob: color-mix(in srgb, var(--accent-yellow) 70%, transparent);
+
+  --status-good: #0a7f0a; /* oscurecido desde #0ca30c: ~3.27:1 como texto no cumplía AA, ahora ~5:1 */
   --status-warning: #fab219;
   --status-serious: #ec835a;
   --status-critical: #d03b3b;
+
+  /* Color de texto legible sobre cada status-* usado como fondo (p. ej. SeverityBadge) */
+  --on-status-good: #ffffff;
+  --on-status-warning: #1a1a1a;
+  --on-status-critical: #ffffff;
+
+  /* Tinte neutro para sombras (componentes RGB de --text-primary) */
+  --shadow-tint: 16, 18, 31;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --surface-1: #1a1a19;
-    --page: #0d0d0d;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --gridline: #2c2c2a;
+    --page: #0a0b12;
+    --surface-1: #14151f;
+    --surface-2: #1b1d2b;
+    --text-primary: #f5f6fb;
+    --text-secondary: #c7cadb;
+    --text-muted: #9a9db3;
+    --gridline: #262838;
     --border: rgba(255, 255, 255, 0.1);
 
-    --series-income: #3987e5;
-    --series-savings: #199e70;
-    --series-expense: #d95926;
-    --series-violet: #9085e9;
+    --series-income: #6690ff;
+    --series-savings: #22c98a;
+    --series-expense: #ff7a45;
+    --series-violet: #9f7ff5;
+
+    /* En modo oscuro los series-* son claros (para leerse como texto sobre superficies
+       oscuras), así que necesitan texto oscuro encima cuando se usan como fondo. */
+    --on-series-income: #1a1a1a;
+    --on-series-savings: #1a1a1a;
+    --on-series-expense: #1a1a1a;
+    --on-series-violet: #1a1a1a;
 
     --status-good: #0ca30c;
     --status-warning: #fab219;
     --status-serious: #ec835a;
     --status-critical: #d03b3b;
+
+    /* En modo oscuro --status-good es más claro, así que necesita texto oscuro encima */
+    --on-status-good: #1a1a1a;
+    --on-status-warning: #1a1a1a;
+    --on-status-critical: #ffffff;
+
+    --shadow-tint: 0, 0, 0;
   }
 }
 
@@ -57,4 +100,68 @@ body {
   overscroll-behavior-x: none;
   background: var(--page);
   color: var(--text-primary);
+  font-feature-settings: "tnum" 1;
+}
+
+/* Fondo ambiental sutil: un resplandor de marca fijo detrás del contenido, muy discreto,
+   para dar profundidad sin distraer ni afectar la legibilidad. */
+.app-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.app-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(50rem 28rem at 15% -10%, color-mix(in srgb, var(--accent-yellow) 10%, transparent), transparent),
+    radial-gradient(46rem 26rem at 110% 10%, color-mix(in srgb, var(--series-violet) 8%, transparent), transparent);
+}
+
+/* Sombras muy discretas: los bloques de color hacen el trabajo visual, no la profundidad. */
+@utility shadow-card {
+  box-shadow: 0 1px 2px rgba(var(--shadow-tint), 0.05);
+}
+
+@utility shadow-card-hover {
+  box-shadow: 0 4px 12px -4px rgba(var(--shadow-tint), 0.14);
+}
+
+@utility shadow-float {
+  box-shadow:
+    0 2px 8px rgba(var(--shadow-tint), 0.08),
+    0 12px 28px -10px rgba(var(--shadow-tint), 0.2);
+}
+
+/* Formas orgánicas decorativas (círculos planos) para bloques "hero". Puramente
+   ornamentales: aria-hidden en el markup, nunca llevan texto encima. */
+@utility blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton-shimmer {
+    background-image: linear-gradient(
+      100deg,
+      var(--gridline) 30%,
+      color-mix(in srgb, var(--gridline) 40%, var(--surface-1)) 50%,
+      var(--gridline) 70%
+    );
+    background-size: 250% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+  }
 }

@@ -1,4 +1,4 @@
-# Backend — Salud Financiera
+# Backend — Rumbo
 
 API REST (Node + TypeScript + Fastify) sobre Postgres para ingresos, gastos, deudas y transferencias.
 

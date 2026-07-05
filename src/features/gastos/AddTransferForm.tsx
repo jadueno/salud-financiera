@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { NewTransfer } from "../../domain/types";
-import { Field } from "../../components/Field";
+import { Field, inputClass } from "../../components/Field";
+import { Button } from "../../components/Button";
 
 export function AddTransferForm({
   accountNames,
@@ -15,16 +16,25 @@ export function AddTransferForm({
   const [toAccount, setToAccount] = useState(accountNames[1] ?? accountNames[0] ?? "");
   const [monthlyAmount, setMonthlyAmount] = useState<number | "">("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const sameAccount = fromAccount !== "" && fromAccount === toAccount;
 
   return (
     <form
       className="mt-4 flex flex-col gap-3 border-t border-[var(--gridline)] pt-4"
       onSubmit={async (e) => {
         e.preventDefault();
+        if (sameAccount) {
+          setError("El origen y el destino no pueden ser la misma cuenta.");
+          return;
+        }
         setSubmitting(true);
+        setError(null);
         try {
           await onSubmit({ fromAccount, toAccount, monthlyAmount: Number(monthlyAmount) });
           onCancel();
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "No se ha podido guardar la transferencia");
         } finally {
           setSubmitting(false);
         }
@@ -36,7 +46,7 @@ export function AddTransferForm({
             required
             value={fromAccount}
             onChange={(e) => setFromAccount(e.target.value)}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+            className={inputClass}
           >
             <option value="" disabled>
               Elige una cuenta
@@ -53,7 +63,7 @@ export function AddTransferForm({
             required
             value={toAccount}
             onChange={(e) => setToAccount(e.target.value)}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+            className={inputClass}
           >
             <option value="" disabled>
               Elige una cuenta
@@ -73,22 +83,22 @@ export function AddTransferForm({
             step={0.01}
             value={monthlyAmount}
             onChange={(e) => setMonthlyAmount(e.target.value === "" ? "" : Number(e.target.value))}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-sm text-[var(--text-primary)]"
+            className={inputClass}
           />
         </Field>
       </div>
+      {error && (
+        <p className="text-xs" style={{ color: "var(--status-critical)" }}>
+          {error}
+        </p>
+      )}
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={submitting || accountNames.length === 0}
-          className="rounded-lg px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
-          style={{ backgroundColor: "var(--series-violet)" }}
-        >
+        <Button type="submit" tone="ink" disabled={submitting || accountNames.length === 0 || sameAccount}>
           {submitting ? "Guardando…" : "Guardar transferencia"}
-        </button>
-        <button type="button" onClick={onCancel} className="rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)]">
+        </Button>
+        <Button variant="ghost" onClick={onCancel}>
           Cancelar
-        </button>
+        </Button>
       </div>
       {accountNames.length === 0 && (
         <p className="text-xs" style={{ color: "var(--status-critical)" }}>

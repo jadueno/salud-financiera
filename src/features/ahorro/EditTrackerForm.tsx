@@ -1,55 +1,60 @@
 import { useState } from "react";
-import type { NewSavingsTracker } from "../../domain/types";
+import type { NewSavingsTracker, SavingsTracker } from "../../domain/types";
 import { Field, inputClass } from "../../components/Field";
 import { Button } from "../../components/Button";
 
-export function AddInvestmentForm({
+export function EditTrackerForm({
+  tracker,
   accountNames,
   onSubmit,
   onCancel,
 }: {
+  tracker: SavingsTracker;
   accountNames: string[];
-  onSubmit: (tracker: NewSavingsTracker) => Promise<void>;
+  onSubmit: (id: string, tracker: NewSavingsTracker) => Promise<void>;
   onCancel: () => void;
 }) {
-  const [name, setName] = useState("");
-  const [account, setAccount] = useState(accountNames[0] ?? "");
-  const [initialBalance, setInitialBalance] = useState<number | "">(0);
+  const [name, setName] = useState(tracker.name);
+  const [account, setAccount] = useState(tracker.account);
+  const [initialBalance, setInitialBalance] = useState<number | "">(tracker.initialBalance);
+  const [initialBalanceAsOf, setInitialBalanceAsOf] = useState(tracker.initialBalanceAsOf);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   return (
     <form
-      className="mt-4 flex flex-col gap-3 border-t border-[var(--gridline)] pt-4"
+      className="mt-3 flex flex-col gap-3 border-t border-[var(--gridline)] pt-3"
       onSubmit={async (e) => {
         e.preventDefault();
         setSubmitting(true);
         setError(null);
         try {
-          await onSubmit({
-            kind: "investment",
+          await onSubmit(tracker.id, {
+            kind: tracker.kind,
             name,
             account,
             initialBalance: Number(initialBalance),
-            initialBalanceAsOf: new Date().toISOString().slice(0, 7),
+            initialBalanceAsOf,
           });
           onCancel();
         } catch (err) {
-          setError(err instanceof Error ? err.message : "No se ha podido crear la inversión");
+          setError(err instanceof Error ? err.message : "No se ha podido actualizar el seguimiento");
         } finally {
           setSubmitting(false);
         }
       }}
     >
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Field label="Nombre">
-          <input
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className={inputClass}
-          />
-        </Field>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {tracker.kind === "investment" && (
+          <Field label="Nombre">
+            <input
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+        )}
         <Field label="Cuenta">
           <select
             required
@@ -57,9 +62,6 @@ export function AddInvestmentForm({
             onChange={(e) => setAccount(e.target.value)}
             className={inputClass}
           >
-            <option value="" disabled>
-              Elige una cuenta
-            </option>
             {accountNames.map((a) => (
               <option key={a} value={a}>
                 {a}
@@ -67,7 +69,7 @@ export function AddInvestmentForm({
             ))}
           </select>
         </Field>
-        <Field label="Valor de partida (0 si empiezas de cero)">
+        <Field label="Saldo de partida (€)">
           <input
             required
             type="number"
@@ -78,6 +80,15 @@ export function AddInvestmentForm({
             className={inputClass}
           />
         </Field>
+        <Field label="Mes de partida">
+          <input
+            required
+            type="month"
+            value={initialBalanceAsOf}
+            onChange={(e) => setInitialBalanceAsOf(e.target.value)}
+            className={inputClass}
+          />
+        </Field>
       </div>
       {error && (
         <p className="text-xs" style={{ color: "var(--status-critical)" }}>
@@ -85,18 +96,13 @@ export function AddInvestmentForm({
         </p>
       )}
       <div className="flex gap-2">
-        <Button type="submit" tone="ink" disabled={submitting || accountNames.length === 0}>
-          {submitting ? "Guardando…" : "Guardar inversión"}
+        <Button type="submit" tone="ink" disabled={submitting}>
+          {submitting ? "Guardando…" : "Guardar cambios"}
         </Button>
         <Button variant="ghost" onClick={onCancel}>
           Cancelar
         </Button>
       </div>
-      {accountNames.length === 0 && (
-        <p className="text-xs" style={{ color: "var(--status-critical)" }}>
-          Primero crea una cuenta en "Ingresos y Gastos".
-        </p>
-      )}
     </form>
   );
 }
