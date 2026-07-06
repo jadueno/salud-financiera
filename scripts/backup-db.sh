@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# backup-db.sh — Backup diario de la base de datos Postgres de salud-financiera.
+# backup-db.sh — Backup diario de la base de datos Postgres de Rumbo.
 #
 # Qué hace:
 #   1. Lanza `pg_dump` DENTRO del contenedor `db` (docker compose exec) para no

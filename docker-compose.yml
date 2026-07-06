@@ -17,4 +17,10 @@ services:
       retries: 10
 
 volumes:
+  # Nombre real fijado explícitamente: si no, el nombre de proyecto de Docker Compose
+  # se deriva del nombre de la carpeta, y renombrarla crearía un volumen nuevo vacío
+  # dejando este (con los datos reales, en este Mac) huérfano. Fijar el nombre hace
+  # que Compose lo reutilice si ya existe (como en este Mac) o lo cree si no (clon
+  # nuevo en otra máquina) — funciona igual en los dos casos.
   salud-financiera-db:
+    name: salud-financiera_salud-financiera-db
