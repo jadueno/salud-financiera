@@ -9,7 +9,6 @@ import { SimuladorScreen } from "./features/simulador/SimuladorScreen";
 import { HomeIcon, ExpenseIcon, DebtIcon, SavingsIcon, TipIcon, SimulatorIcon } from "./components/icons";
 import { LoadingState } from "./components/LoadingState";
 import { BrandMark } from "./components/BrandMark";
-import { ExportDataButton } from "./components/ExportDataButton";
 
 type Section = "resumen" | "gastos" | "deudas" | "ahorro" | "recomendaciones" | "simulador";
 
@@ -62,9 +61,6 @@ export default function App() {
 
       <main className="relative flex-1 p-4 pb-36 sm:p-8 sm:pb-12">
         <div className="mx-auto max-w-3xl">
-          <div className="mb-2 flex justify-end">
-            <ExportDataButton />
-          </div>
           {data.error && (
             <div
               role="alert"
