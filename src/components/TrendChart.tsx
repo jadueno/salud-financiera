@@ -13,7 +13,8 @@ const PAD_TOP = 16;
 const PAD_BOTTOM = 24;
 
 /**
- * Línea de tendencia de una sola serie: 2px, marcadores de 24px con anillo en el
+ * Línea de tendencia de una sola serie: 2px, marcadores de 12px en móvil / 24px
+ * en escritorio (mismo breakpoint sm: que el resto de la app) con anillo en el
  * color de superficie, cuadrícula recessive, y una capa de hover con crosshair
  * + tooltip (ver skill de dataviz). El valor de cada punto vive en el hover,
  * en la tarjeta resumen de arriba y en la tabla de abajo — no hace falta
@@ -118,12 +119,21 @@ export function TrendChart({
 
         {points.map((p, i) => (
           <g key={p.month}>
-            <circle cx={x(i)} cy={y(p.value)} r={12} fill={color} stroke="var(--surface-1)" strokeWidth={2} />
+            <circle
+              cx={x(i)}
+              cy={y(p.value)}
+              r={6}
+              className="sm:[r:12px]"
+              fill={color}
+              stroke="var(--surface-1)"
+              strokeWidth={2}
+            />
             {/* Hit target más ancho que el marcador pintado. */}
             <circle
               cx={x(i)}
               cy={y(p.value)}
-              r={20}
+              r={14}
+              className="sm:[r:20px]"
               fill="transparent"
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(null)}
