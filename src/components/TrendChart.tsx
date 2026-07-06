@@ -13,10 +13,12 @@ const PAD_TOP = 16;
 const PAD_BOTTOM = 24;
 
 /**
- * Línea de tendencia de una sola serie: 2px, marcadores ≥8px con anillo en el
- * color de superficie, cuadrícula recessive, etiqueta directa solo en el último
- * punto, y una capa de hover con crosshair + tooltip (ver skill de dataviz).
- * Una sola serie no lleva leyenda: el título de la tarjeta ya dice qué se traza.
+ * Línea de tendencia de una sola serie: 2px, marcadores ≥12px con anillo en el
+ * color de superficie, cuadrícula recessive, y una capa de hover con crosshair
+ * + tooltip (ver skill de dataviz). El valor de cada punto vive en el hover,
+ * en la tarjeta resumen de arriba y en la tabla de abajo — no hace falta
+ * repetirlo como etiqueta directa sobre el propio gráfico. Una sola serie no
+ * lleva leyenda: el título de la tarjeta ya dice qué se traza.
  */
 export function TrendChart({
   points,
@@ -116,7 +118,7 @@ export function TrendChart({
 
         {points.map((p, i) => (
           <g key={p.month}>
-            <circle cx={x(i)} cy={y(p.value)} r={4} fill={color} stroke="var(--surface-1)" strokeWidth={2} />
+            <circle cx={x(i)} cy={y(p.value)} r={6} fill={color} stroke="var(--surface-1)" strokeWidth={2} />
             {/* Hit target ≥24px, más ancho que el marcador pintado. */}
             <circle
               cx={x(i)}
@@ -133,17 +135,6 @@ export function TrendChart({
             />
           </g>
         ))}
-
-        {/* Etiqueta directa solo en el último punto (selectiva, no un número por punto). */}
-        <text
-          x={Math.min(x(points.length - 1), WIDTH - 60)}
-          y={y(last.value) - 10}
-          textAnchor="end"
-          className="text-[11px] font-semibold"
-          fill="var(--text-primary)"
-        >
-          {formatValue(last.value)}
-        </text>
       </svg>
 
       {hoveredPoint && (
