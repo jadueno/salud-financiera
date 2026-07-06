@@ -1,4 +1,13 @@
+import { timingSafeEqual } from "node:crypto";
 import type { FastifyInstance } from "fastify";
+
+/** Compara dos strings en tiempo constante para que la duración de la comparación
+ * no filtre, byte a byte, cuánto del token adivinó un atacante. */
+function timingSafeStringEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
+}
 
 /**
  * Autenticación opcional por token fijo (bearer). Si no hay `token`, no registra nada:
@@ -10,7 +19,7 @@ export function registerAuth(app: FastifyInstance, token: string | undefined): v
 
   app.addHook("onRequest", async (request, reply) => {
     if (request.url === "/health") return;
-    if (request.headers.authorization !== `Bearer ${token}`) {
+    if (!timingSafeStringEqual(request.headers.authorization ?? "", `Bearer ${token}`)) {
       reply.code(401).send({ error: "No autorizado" });
     }
   });
