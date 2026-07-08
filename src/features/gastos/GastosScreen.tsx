@@ -96,7 +96,7 @@ export function GastosScreen({
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
+      <div className="py-2 sm:py-3">
         <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-4xl">
           Ingresos y Gastos
         </h1>
