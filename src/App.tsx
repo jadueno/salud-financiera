@@ -4,24 +4,17 @@ import { ResumenScreen } from "./features/resumen/ResumenScreen";
 import { GastosScreen } from "./features/gastos/GastosScreen";
 import { DeudasScreen } from "./features/deudas/DeudasScreen";
 import { AhorroScreen } from "./features/ahorro/AhorroScreen";
-import { RecomendacionesScreen } from "./features/recomendaciones/RecomendacionesScreen";
 import { SimuladorScreen } from "./features/simulador/SimuladorScreen";
 import { HistorialScreen } from "./features/historial/HistorialScreen";
-import {
-  HomeIcon,
-  ExpenseIcon,
-  DebtIcon,
-  SavingsIcon,
-  TipIcon,
-  SimulatorIcon,
-  TrendIcon,
-} from "./components/icons";
+import { HomeIcon, ExpenseIcon, DebtIcon, SavingsIcon, SimulatorIcon, TrendIcon } from "./components/icons";
 import { LoadingState } from "./components/LoadingState";
 import { BrandMark } from "./components/BrandMark";
 
 // "Perfil" no es una sección de navegación: hay demasiadas ya, y no es algo que se
 // consulte a diario — vive como un botón/modal dentro de "Resumen" (ver ResumenScreen).
-type Section = "resumen" | "gastos" | "deudas" | "ahorro" | "recomendaciones" | "simulador" | "historial";
+// "Recomendaciones" tampoco: la lista completa de consejos vive en la tarjeta "Qué
+// deberías mirar" de "Resumen", no en una sección propia.
+type Section = "resumen" | "gastos" | "deudas" | "ahorro" | "simulador" | "historial";
 
 const sections: {
   id: Section;
@@ -35,7 +28,6 @@ const sections: {
   { id: "ahorro", label: "Ahorro", shortLabel: "Ahorro", icon: SavingsIcon },
   { id: "simulador", label: "Simulador", shortLabel: "Simular", icon: SimulatorIcon },
   { id: "historial", label: "Historial", shortLabel: "Historial", icon: TrendIcon },
-  { id: "recomendaciones", label: "Recomendaciones", shortLabel: "Consejos", icon: TipIcon },
 ];
 
 export default function App() {
@@ -146,14 +138,6 @@ export default function App() {
                   onAddSnapshot={data.addSnapshot}
                   onUpdateSnapshot={data.updateSnapshot}
                   onRemoveSnapshot={data.removeSnapshot}
-                />
-              )}
-              {section === "recomendaciones" && (
-                <RecomendacionesScreen
-                  profile={data.profile}
-                  accounts={data.accounts}
-                  trackers={data.trackers}
-                  properties={data.properties}
                 />
               )}
             </>

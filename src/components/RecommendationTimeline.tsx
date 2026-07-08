@@ -8,16 +8,8 @@ import { SeverityBadge } from "./StatusBadge";
  * ordenadas por prioridad) destacada en una tarjeta de color sólido en vez de solo un
  * badge — así se ve de un vistazo cuál es la próxima acción a tomar.
  */
-export function RecommendationTimeline({
-  items,
-  headingLevel: Heading = "h3",
-}: {
-  items: Recommendation[];
-  /** Nivel de encabezado para el título de cada ítem, según el contexto donde se use
-   * (p. ej. "h2" si no hay un título de sección envolvente, "h3" si va dentro de una
-   * Card con su propio "h2"). */
-  headingLevel?: "h2" | "h3";
-}) {
+export function RecommendationTimeline({ items }: { items: Recommendation[] }) {
+  const Heading = "h3";
   return (
     <ol aria-label="Recomendaciones ordenadas por prioridad" className="flex flex-col">
       {items.map((rec, index) => {

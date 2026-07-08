@@ -38,9 +38,9 @@ export function ResumenScreen({
   const net = netMonthlyCashflow(profile);
   const efBalance = currentEmergencyFundBalance(trackers, accountBalances);
   const healthScore = financialHealthScore(profile, accountBalances, trackers, efBalance);
-  const topRecommendations = buildRecommendations(profile, efBalance, accountBalances, trackers, properties)
-    .sort((a, b) => severityRank(a.severity) - severityRank(b.severity))
-    .slice(0, 3);
+  const recommendations = buildRecommendations(profile, efBalance, accountBalances, trackers, properties).sort(
+    (a, b) => severityRank(a.severity) - severityRank(b.severity),
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -88,12 +88,12 @@ export function ResumenScreen({
 
       <Card>
         <h2 className="mb-4 text-sm font-semibold text-[var(--text-primary)]">Qué deberías mirar</h2>
-        {topRecommendations.length === 0 ? (
+        {recommendations.length === 0 ? (
           <p className="text-sm text-[var(--text-muted)]">
             Todo en orden por ahora: no tenemos ninguna recomendación pendiente para ti.
           </p>
         ) : (
-          <RecommendationTimeline items={topRecommendations} />
+          <RecommendationTimeline items={recommendations} />
         )}
       </Card>
 

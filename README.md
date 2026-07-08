@@ -105,7 +105,7 @@ Notas:
 
 - `src/domain/` — tipos y cálculos financieros puros (sin UI, sin red).
 - `src/data/` — `api.ts` + `useFinancialData.ts` (cliente HTTP y estado de la app).
-- `src/features/` — una pantalla por carpeta (resumen, gastos [ingresos+gastos+transferencias+cuentas], deudas, ahorro, simulador, historial, recomendaciones), con sus formularios de alta. `perfil/` es la excepción: no es una sección de navegación, es el contenido del modal que abre el botón "Perfil" de "Resumen".
+- `src/features/` — una pantalla por carpeta (resumen, gastos [ingresos+gastos+transferencias+cuentas], deudas, ahorro, simulador, historial), con sus formularios de alta. `perfil/` es la excepción: no es una sección de navegación, es el contenido del modal que abre el botón "Perfil" de "Resumen". Las recomendaciones tampoco tienen pantalla propia: la lista completa vive en la tarjeta "Qué deberías mirar" de "Resumen".
 - `src/components/Modal.tsx` — cascarón de modal compartido (overlay, cabecera, cerrar), usado por el modal de Perfil y el de importar extractos bancarios.
 - `src/components/` — piezas de UI reutilizables (incluye `ConfirmProvider`, el modal de confirmación de borrados).
 - `backend/` — API en Node + TypeScript (Fastify) sobre Postgres, arquitectura hexagonal (`domain/` → `application/` → `infrastructure/`). Ver `backend/README.md`.
